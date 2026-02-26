@@ -1,4 +1,4 @@
-# FIT Automate Master Blueprint v3
+# FIT Automate Master Blueprint v1
 
 This document will grow into the master plan for the FIT documentation automation effort. Each phase describes the target outcome for the few-shot AI loops that live in this repo.
 
