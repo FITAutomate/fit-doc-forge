@@ -16,6 +16,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Scaffold script now copies system docs into `_SYSTEM/` without overwriting user edits
 
 ### Changed
+- Checked Phase 2 scaffold/templates/system-docs boxes in blueprint Part 10
 - Checked all Phase 1 boxes in blueprint Part 10 — Phase 1 is complete
 - Updated `.ai/skills/repo.md` with CHANGELOG.md, .github, fit-docs key directories
 - Issue template dropdown now shows real phase descriptions from the blueprint
