@@ -14,5 +14,8 @@ dev = [
     "pytest",
 ]
 
+[tool.setuptools.packages.find]
+exclude = ["vault_templates*", "vault_system_docs*", "tests*"]
+
 [tool.pytest.ini_options]
 pythonpath = ["."]
