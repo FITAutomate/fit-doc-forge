@@ -787,10 +787,10 @@ Request: [paste capture note]
 - [x] **Milestone:** PIV loop is live. Agent can read the plan and propose work.
 
 ### Phase 2 — Vault Foundation (Days 3-5)
-- [ ] Create `D:\Vaults\FIT-Vault\` with full folder structure (Part 2)
-- [ ] Create all 7 templates in `_SYSTEM/templates/`
-- [ ] Create `_SYSTEM/agent-instructions.md` (embed Part 0 README-as-schema rule)
-- [ ] Create `_SYSTEM/vault-map.md`
+- [x] Create `D:\Vaults\FIT-Vault\` with full folder structure (Part 2)
+- [x] Create all 5 templates in `_SYSTEM/templates/` (Part 5 defines 5; 2 more TBD)
+- [x] Create `_SYSTEM/agent-instructions.md` (embed Part 0 README-as-schema rule)
+- [x] Create `_SYSTEM/vault-map.md`
 - [ ] Install Obsidian → open FIT-Vault
 - [ ] Install Tier 1 plugins
 - [ ] **Milestone:** You can draft and organize content in Obsidian
