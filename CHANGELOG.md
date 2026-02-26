@@ -9,6 +9,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `.ai/skills/changelog.md` — format rules for CHANGELOG entries
 - `agent/scaffold_vault.py` — idempotent script to create the full vault folder tree (blueprint Part 2)
 - `agent/tests/test_scaffold_vault.py` — 4 tests covering folder creation, placeholders, idempotency
+- `agent/vault_templates/` — 5 Obsidian draft templates verbatim from blueprint Part 5 (sop, kb-article, procedure, solution-description, doc-request)
+- Scaffold script now copies templates into `_SYSTEM/templates/` without overwriting user edits
 
 ### Changed
 - Checked all Phase 1 boxes in blueprint Part 10 — Phase 1 is complete

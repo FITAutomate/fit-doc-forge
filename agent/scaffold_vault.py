@@ -1,7 +1,9 @@
 """Create the FIT-Vault Obsidian folder tree defined in blueprint Part 2.
 
 Idempotent: directories are created with exist_ok=True and placeholder
-files are only written when they don't already exist.
+files are only written when they don't already exist.  Templates are
+copied from agent/vault_templates/ into _SYSTEM/templates/ only when
+they don't already exist (so user edits are never overwritten).
 
 Usage:
     python scaffold_vault.py                     # uses VAULT_ROOT from .env
@@ -11,6 +13,7 @@ Usage:
 from __future__ import annotations
 
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -72,6 +75,8 @@ PLACEHOLDER_FILES: dict[str, str] = {
     ),
 }
 
+TEMPLATES_DIR = Path(__file__).resolve().parent / "vault_templates"
+
 
 def scaffold(vault_root: Path) -> list[str]:
     """Create the vault tree under *vault_root*. Return list of actions taken."""
@@ -89,6 +94,15 @@ def scaffold(vault_root: Path) -> list[str]:
         if not target.exists():
             target.write_text(content, encoding="utf-8")
             actions.append(f"write {rel_path}")
+
+    if TEMPLATES_DIR.is_dir():
+        dest_dir = vault_root / "_SYSTEM" / "templates"
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        for src in sorted(TEMPLATES_DIR.glob("*.md")):
+            dest = dest_dir / src.name
+            if not dest.exists():
+                shutil.copy2(src, dest)
+                actions.append(f"template {src.name}")
 
     return actions
 
