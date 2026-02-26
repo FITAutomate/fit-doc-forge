@@ -778,13 +778,13 @@ Request: [paste capture note]
 
 ## PART 10: PHASED ROLLOUT
 
-### Phase 1 — fit-docs-forge Repo (Week 1)
+### Phase 1 — fit-docs-forge Repo (Week 1) ✅
 > Build the agent system first. Everything else runs on top of it.
-- [ ] Create `fit-docs-forge` repo from PIV bootstrap
-- [ ] Run PIV loop: `.ai/` scaffolding + CI passes
-- [ ] Seed `FIT-Automate-Master-Blueprint-v3.md` as the plan
-- [ ] Agent reads blueprint → proposes Phase 2 PRs
-- [ ] **Milestone:** PIV loop is live. Agent can read the plan and propose work.
+- [x] Create `fit-docs-forge` repo from PIV bootstrap
+- [x] Run PIV loop: `.ai/` scaffolding + CI passes
+- [x] Seed `FIT-Automate-Master-Blueprint-v3.md` as the plan
+- [x] Agent reads blueprint → proposes Phase 2 PRs
+- [x] **Milestone:** PIV loop is live. Agent can read the plan and propose work.
 
 ### Phase 2 — Vault Foundation (Days 3-5)
 - [ ] Create `D:\Vaults\FIT-Vault\` with full folder structure (Part 2)
