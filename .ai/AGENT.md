@@ -10,3 +10,8 @@ Apply these rules for every agent session in this repo:
 - Agent drop zone for new drafts: `C:\Vaults\FIT-Vault\00-INBOX\_agent-drop\`
 - Defaults for new drafts: all `gate_` frontmatter fields start as `false`.
 - Do not invent SLAs, prices, or numbers not explicitly provided in the blueprint.
+- **Documentation gate (REQUIRED on every PR):**
+  1. Add a CHANGELOG.md entry under `[Unreleased]` describing what changed (Added/Changed/Fixed/Removed)
+  2. Update README.md if the PR changes repo structure, validation commands, or contributing workflow
+  3. Update `.ai/` files if agent rules, commands, or repo map change
+  4. See `.ai/skills/tests.md` for the full documentation gate checklist
