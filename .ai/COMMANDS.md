@@ -1,5 +1,11 @@
 # Commands reference for fit-doc-forge
 
+## Windows prerequisite
+If `python` or `py` fails with "The file cannot be accessed by the system":
+1. Open **Settings → Apps → Advanced app settings → App execution aliases**
+2. Toggle **off** `python.exe` and `python3.exe` (the "App Installer" entries)
+3. Open a **new** terminal — verify with `python --version`
+
 ## Python gate (`agent/`)
 ```
 cd agent
@@ -16,10 +22,16 @@ npm run lint
 npm run build
 ```
 
-## Full validation (run both terminals before any PR)
+## Full validation (run both before any PR)
 ```
 # Terminal 1:
 cd agent && pip install -e ".[dev]" && ruff check . && pytest
 # Terminal 2:
 cd app && npm ci && npm run lint && npm run build
 ```
+
+## Vault scaffold (Phase 2)
+```
+python agent/scaffold_vault.py
+```
+Creates the full Obsidian vault folder tree at VAULT_ROOT (from `.env`, default `D:\Vaults\FIT-Vault`). Idempotent — safe to re-run.
