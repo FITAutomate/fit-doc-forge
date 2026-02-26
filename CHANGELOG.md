@@ -9,6 +9,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `.ai/skills/changelog.md` — format rules for CHANGELOG entries
 
 ### Changed
+- Checked all Phase 1 boxes in blueprint Part 10 — Phase 1 is complete
+- Updated `.ai/skills/repo.md` with CHANGELOG.md, .github, fit-docs key directories
 - Issue template dropdown now shows real phase descriptions from the blueprint
 - Removed nonexistent `piv` label from issue template
 - Cleaned up stale merged branches
