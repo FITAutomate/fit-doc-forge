@@ -11,6 +11,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `agent/tests/test_scaffold_vault.py` — 4 tests covering folder creation, placeholders, idempotency
 - `agent/vault_templates/` — 5 Obsidian draft templates verbatim from blueprint Part 5 (sop, kb-article, procedure, solution-description, doc-request)
 - Scaffold script now copies templates into `_SYSTEM/templates/` without overwriting user edits
+- `agent/vault_system_docs/agent-instructions.md` — embeds Part 0 README-as-schema rule + general agent rules
+- `agent/vault_system_docs/vault-map.md` — folder structure quick reference with naming conventions
+- Scaffold script now copies system docs into `_SYSTEM/` without overwriting user edits
 
 ### Changed
 - Checked all Phase 1 boxes in blueprint Part 10 — Phase 1 is complete

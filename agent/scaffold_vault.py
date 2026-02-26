@@ -76,6 +76,7 @@ PLACEHOLDER_FILES: dict[str, str] = {
 }
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "vault_templates"
+SYSTEM_DOCS_DIR = Path(__file__).resolve().parent / "vault_system_docs"
 
 
 def scaffold(vault_root: Path) -> list[str]:
@@ -103,6 +104,15 @@ def scaffold(vault_root: Path) -> list[str]:
             if not dest.exists():
                 shutil.copy2(src, dest)
                 actions.append(f"template {src.name}")
+
+    if SYSTEM_DOCS_DIR.is_dir():
+        dest_dir = vault_root / "_SYSTEM"
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        for src in sorted(SYSTEM_DOCS_DIR.glob("*.md")):
+            dest = dest_dir / src.name
+            if not dest.exists():
+                shutil.copy2(src, dest)
+                actions.append(f"system-doc {src.name}")
 
     return actions
 
