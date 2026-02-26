@@ -7,6 +7,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 - `.ai/skills/changelog.md` — format rules for CHANGELOG entries
+- `agent/scaffold_vault.py` — idempotent script to create the full vault folder tree (blueprint Part 2)
+- `agent/tests/test_scaffold_vault.py` — 4 tests covering folder creation, placeholders, idempotency
 
 ### Changed
 - Checked all Phase 1 boxes in blueprint Part 10 — Phase 1 is complete
