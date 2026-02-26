@@ -1,6 +1,14 @@
 from pathlib import Path
 
-from scaffold_vault import DIRECTORIES, PLACEHOLDER_FILES, scaffold
+from scaffold_vault import DIRECTORIES, PLACEHOLDER_FILES, TEMPLATES_DIR, scaffold
+
+EXPECTED_TEMPLATES = [
+    "doc-request.md",
+    "kb-article-draft.md",
+    "procedure-draft.md",
+    "solution-description.md",
+    "sop-draft.md",
+]
 
 
 def test_scaffold_creates_all_directories(tmp_path: Path):
@@ -15,6 +23,26 @@ def test_scaffold_creates_placeholder_files(tmp_path: Path):
         target = tmp_path / rel_path
         assert target.exists(), f"Missing placeholder: {rel_path}"
         assert target.read_text(encoding="utf-8") == expected_content
+
+
+def test_scaffold_copies_templates(tmp_path: Path):
+    scaffold(tmp_path)
+    tpl_dir = tmp_path / "_SYSTEM" / "templates"
+    for name in EXPECTED_TEMPLATES:
+        dest = tpl_dir / name
+        assert dest.exists(), f"Missing template: {name}"
+        src = TEMPLATES_DIR / name
+        assert dest.read_text(encoding="utf-8") == src.read_text(encoding="utf-8")
+
+
+def test_scaffold_does_not_overwrite_user_templates(tmp_path: Path):
+    scaffold(tmp_path)
+    custom = tmp_path / "_SYSTEM" / "templates" / "sop-draft.md"
+    custom.write_text("my custom version", encoding="utf-8")
+
+    actions = scaffold(tmp_path)
+    assert not any("template sop-draft.md" in a for a in actions)
+    assert custom.read_text(encoding="utf-8") == "my custom version"
 
 
 def test_scaffold_is_idempotent(tmp_path: Path):
@@ -32,3 +60,4 @@ def test_scaffold_returns_actions(tmp_path: Path):
     assert len(actions) > 0, "First run should report actions"
     assert any("mkdir" in a for a in actions)
     assert any("write" in a for a in actions)
+    assert any("template" in a for a in actions)
