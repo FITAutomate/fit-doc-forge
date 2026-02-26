@@ -1,0 +1,33 @@
+repo: fit-doc-forge
+repo_type: python-nextjs
+description: AI documentation pipeline for FIT Automate (agent + preview UI).
+
+blueprint: FIT-Automate-Master-Blueprint-v3.md
+
+structure:
+  agent: /agent
+  app: /app
+
+validation:
+  python:
+    install: "pip install -e \".[dev]\""
+    lint: "ruff check ."
+    test: "pytest"
+    working_dir: agent
+  nextjs:
+    install: "npm ci"
+    lint: "npm run lint"
+    build: "npm run build"
+    working_dir: app
+
+agent_rules:
+  readme_as_schema: true
+  readme_overrides_yaml: true
+  gate_fields_default: false
+  no_invented_slas: true
+  no_secrets: true
+
+pr_discipline:
+  max_concerns_per_pr: 1
+  draft_first: true
+  validation_evidence_required: true

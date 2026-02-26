@@ -1,0 +1,44 @@
+name: PIV feature request
+about: Capture blueprint references and compliance checks for new drafts.
+title: "[PIV] "
+labels:
+  - piv
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      description: "Brief summary of the feature request."
+      placeholder: "e.g. Phase 1 — outline agent blueprint"
+      required: true
+  - type: dropdown
+    id: blueprint_phase
+    attributes:
+      label: Blueprint phase
+      description: "Select the Phase referenced in FIT-Automate-Master-Blueprint-v3.md."
+      options:
+        - Phase 1
+        - Phase 2
+        - Phase 3
+        - Phase 4
+        - Phase 5
+        - Phase 6
+        - Phase 7
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe what this feature delivers.
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+  - type: input
+    id: readme_schema_check
+    attributes:
+      label: README schema check
+      description: Which README was read and what rules were applied?
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes

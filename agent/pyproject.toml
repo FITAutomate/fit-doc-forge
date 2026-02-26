@@ -1,0 +1,15 @@
+[project]
+name = "fit-doc-forge-agent"
+version = "0.1.0"
+description = "Schema-aware drafting flows for FIT doc automation."
+requires-python = ">=3.11"
+dependencies = [
+    "pyyaml",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "pytest",
+]

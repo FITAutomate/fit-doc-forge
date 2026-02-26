@@ -1,0 +1,8 @@
+agent/.env
+__pycache__/
+*.pyc
+app/node_modules/
+app/.next/
+app/dist/
+.env
+.vscode/
