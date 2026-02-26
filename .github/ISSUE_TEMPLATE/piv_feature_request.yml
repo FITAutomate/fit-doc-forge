@@ -1,29 +1,27 @@
 name: PIV feature request
-about: Capture blueprint references and compliance checks for new drafts.
+about: Capture blueprint references and compliance checks for new work.
 title: "[PIV] "
-labels:
-  - piv
 body:
   - type: input
     id: title
     attributes:
       label: Title
       description: "Brief summary of the feature request."
-      placeholder: "e.g. Phase 1 — outline agent blueprint"
+      placeholder: "e.g. Phase 3 — build promote script"
       required: true
   - type: dropdown
     id: blueprint_phase
     attributes:
       label: Blueprint phase
-      description: "Select the Phase referenced in FIT-Automate-Master-Blueprint-v3.md."
+      description: "Select the Phase referenced in FIT-Automate-Master-Blueprint-v3.md Part 10."
       options:
-        - Phase 1
-        - Phase 2
-        - Phase 3
-        - Phase 4
-        - Phase 5
-        - Phase 6
-        - Phase 7
+        - "Phase 1 — fit-docs-forge Repo"
+        - "Phase 2 — Vault Foundation"
+        - "Phase 3 — Promote Script"
+        - "Phase 4 — Next.js Preview UI"
+        - "Phase 5 — Airtable Bridge"
+        - "Phase 6 — Agent Automation"
+        - "Phase 7 — Folder Rewrite Command"
   - type: textarea
     id: description
     attributes:

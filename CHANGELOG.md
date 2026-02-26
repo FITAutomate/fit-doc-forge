@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- `.ai/skills/changelog.md` — format rules for CHANGELOG entries
+
+### Changed
+- Issue template dropdown now shows real phase descriptions from the blueprint
+- Removed nonexistent `piv` label from issue template
+- Cleaned up stale merged branches
+
 ## 2026-02-26
 
 ### Added
