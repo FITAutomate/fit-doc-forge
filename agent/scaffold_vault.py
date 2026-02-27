@@ -74,6 +74,12 @@ PLACEHOLDER_FILES: dict[str, str] = {
     "_SYSTEM/changelog.md": (
         "# Vault Changelog\n\nWhat the agents did.\n"
     ),
+    "_SYSTEM/naming-conventions.md": (
+        "# Naming Conventions\n\nAuthoritative naming rules across draft and published libraries.\n"
+    ),
+    "_SYSTEM/tag-taxonomy.md": (
+        "# Tag Taxonomy\n\nApproved tags for vault indexing and retrieval.\n"
+    ),
 }
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "vault_templates"
