@@ -23,6 +23,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `agent/airtable_sync.py` Phase 5 entrypoint placeholder with CLI flags
 - `pytest.ini` at repo root so `pytest` resolves `agent/` modules when run from repo root
 - 4 sync tests covering copy, update, delete, and idempotency
+- `app/` minimal real Next.js App Router scaffold (`app/app/layout.js`, `app/app/page.js`, `app/app/globals.css`, `.eslintrc.json`)
 
 ### Changed
 - Blueprint Part 0 library README table updated to match actual file paths (`README.md`, not emoji names)
@@ -39,6 +40,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Script naming standardized across docs and vault system files (`promote.py`, `fit-docs_sync.py`, `airtable_sync.py`)
 - Repo naming standardized to `fit-docs-forge` in top-level metadata files
 - `agent/scaffold_vault.py` now creates `_SYSTEM/naming-conventions.md` and `_SYSTEM/tag-taxonomy.md` placeholder files for Phase 2 consistency
+- `app/package.json` scripts now run real `next lint` and `next build` commands instead of placeholders
+- `README.md` app status updated from `Placeholder` to `Scaffolded`
+- `.ai/skills/repo.md` app structure note updated to reflect the new Next.js scaffold baseline
 
 ## 2026-02-26
 
