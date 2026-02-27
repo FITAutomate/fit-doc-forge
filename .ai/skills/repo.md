@@ -2,7 +2,7 @@
 
 ## Structure
 - `/agent` — Python package. All AI logic, file ops, promote scripts, and folder rewrites will live here.
-- `/app` — minimal Next.js scaffold with real lint/build gate; preview features are built in later Phase 4 PRs.
+- `/app` — Next.js preview UI with a read-only draft browser and frontmatter gate panel (Phase 4 PR2).
 - `/.ai` — agent scaffolding. Read `AGENT.md` before every session.
 - `/FIT-Automate-Master-Blueprint-v3.md` — the master plan (7 phases). Agents consult this before proposing PRs.
 - `/CHANGELOG.md` — running history of every merged change. Updated on every PR.

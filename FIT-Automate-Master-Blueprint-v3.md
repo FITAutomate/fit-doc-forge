@@ -806,9 +806,9 @@ Request: [paste capture note]
 
 ### Phase 4 — Next.js Preview UI (Week 2)
 > The fit-docs-forge `/app` directory. Preview rendered MD without opening Typora.
-- [ ] Scaffold Next.js app in `fit-docs-forge/app/`
-- [ ] Wire to vault path — reads `02-DRAFTS/` and `03-REVIEW/` folders
-- [ ] Render MD files with frontmatter panel (shows gate status)
+- [x] Scaffold Next.js app in `fit-docs-forge/app/`
+- [x] Wire to vault path — reads `02-DRAFTS/` and `03-REVIEW/` folders
+- [x] Render MD files with frontmatter panel (shows gate status)
 - [ ] Approve button → triggers promote script via Python API
 - [ ] **Milestone:** Review and approve docs from browser. No Typora needed.
 

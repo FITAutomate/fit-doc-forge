@@ -11,12 +11,171 @@ body {
   margin: 0;
   padding: 2rem;
   line-height: 1.5;
+  background: #f5f7fb;
+  color: #132238;
 }
 
 main {
-  max-width: 56rem;
+  max-width: 120rem;
 }
 
 h1 {
   margin-top: 0;
+}
+
+code {
+  background: #e8edf5;
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.35rem;
+}
+
+a {
+  color: #0b5dd7;
+}
+
+.page-header {
+  margin-bottom: 1rem;
+}
+
+.page {
+  width: 100%;
+}
+
+.browser-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(16rem, 22rem) minmax(24rem, 1fr) minmax(18rem, 24rem);
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #dce4f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.sidebar {
+  max-height: calc(100vh - 10rem);
+  overflow: auto;
+}
+
+.file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.file-link {
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  text-decoration: none;
+}
+
+.file-link.active {
+  background: #ebf2ff;
+  border-color: #b9cff8;
+}
+
+.file-link small {
+  color: #51657f;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.content {
+  min-height: 30rem;
+}
+
+.details {
+  display: grid;
+  gap: 1rem;
+}
+
+.meta-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.meta-table th,
+.meta-table td {
+  border-top: 1px solid #e6edf8;
+  padding: 0.35rem 0.3rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.meta-table th {
+  width: 40%;
+}
+
+.gate-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gate-item {
+  align-items: center;
+  border-top: 1px solid #e6edf8;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.45rem 0;
+}
+
+.gate-pass,
+.gate-fail {
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+}
+
+.gate-pass {
+  background: #d8f3e2;
+  color: #0c5b2d;
+}
+
+.gate-fail {
+  background: #fde0e0;
+  color: #8d1d1d;
+}
+
+.markdown-body {
+  overflow-wrap: anywhere;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid #dce4f0;
+  padding: 0.3rem 0.45rem;
+}
+
+.muted {
+  color: #58708f;
+}
+
+.error-box {
+  background: #fff2f2;
+  border: 1px solid #f0bcbc;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+}
+
+@media (max-width: 1024px) {
+  .browser-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    max-height: 20rem;
+  }
 }

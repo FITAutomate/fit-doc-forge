@@ -24,6 +24,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `pytest.ini` at repo root so `pytest` resolves `agent/` modules when run from repo root
 - 4 sync tests covering copy, update, delete, and idempotency
 - `app/` minimal real Next.js App Router scaffold (`app/app/layout.js`, `app/app/page.js`, `app/app/globals.css`, `.eslintrc.json`)
+- `app/app/drafts/page.js` read-only draft browser with markdown preview, frontmatter table, and gate status panel
+- `app/lib/vault.js` filesystem-backed vault reader for `02-DRAFTS/` and `03-REVIEW/` with safe path checks
 
 ### Changed
 - Blueprint Part 0 library README table updated to match actual file paths (`README.md`, not emoji names)
@@ -43,6 +45,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `app/package.json` scripts now run real `next lint` and `next build` commands instead of placeholders
 - `README.md` app status updated from `Placeholder` to `Scaffolded`
 - `.ai/skills/repo.md` app structure note updated to reflect the new Next.js scaffold baseline
+- `README.md` app status updated to `Active (Phase 4 PR2)` and `app/README.md` now documents vault browser behavior
 
 ## 2026-02-26
 

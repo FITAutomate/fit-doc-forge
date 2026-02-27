@@ -10,7 +10,7 @@ The full plan lives in [`FIT-Automate-Master-Blueprint-v3.md`](FIT-Automate-Mast
 | `.ai/` | Agent rules, commands, config, templates, skills | Active |
 | `.github/` | CI workflows, Dependabot, PR/issue templates | Active |
 | `agent/` | Python package — AI logic, promote script, folder rewrites | Skeleton |
-| `app/` | Next.js — preview UI, gate status, approve-to-promote | Scaffolded |
+| `app/` | Next.js — preview UI, gate status, approve-to-promote | Active (Phase 4 PR2) |
 | `FIT-Automate-Master-Blueprint-v3.md` | The master plan (7 phases) | Active |
 | `CHANGELOG.md` | Running history of every merged change | Active |
 
