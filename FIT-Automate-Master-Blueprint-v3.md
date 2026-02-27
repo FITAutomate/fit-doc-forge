@@ -809,8 +809,8 @@ Request: [paste capture note]
 - [x] Scaffold Next.js app in `fit-docs-forge/app/`
 - [x] Wire to vault path — reads `02-DRAFTS/` and `03-REVIEW/` folders
 - [x] Render MD files with frontmatter panel (shows gate status)
-- [ ] Approve button → triggers promote script via Python API
-- [ ] **Milestone:** Review and approve docs from browser. No Typora needed.
+- [x] Approve button -> triggers promote script via Python API
+- [x] **Milestone:** Review and approve docs from browser. No Typora needed.
 
 ### Phase 5 — Airtable Bridge (Week 2-3)
 - [ ] Get Airtable API key + Base/Table IDs
@@ -861,3 +861,4 @@ python D:\Vaults\FIT-Vault\_SYSTEM\scripts\promote.py "02-DRAFTS/<path-to-draft>
 
 *FIT Automate Internal | v3.0 | February 2025*
 *Single source of truth. All previous drafts superseded.*
+
