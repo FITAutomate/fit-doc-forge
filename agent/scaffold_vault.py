@@ -78,6 +78,7 @@ PLACEHOLDER_FILES: dict[str, str] = {
 
 TEMPLATES_DIR = Path(__file__).resolve().parent / "vault_templates"
 SYSTEM_DOCS_DIR = Path(__file__).resolve().parent / "vault_system_docs"
+SCRIPTS_DIR = Path(__file__).resolve().parent
 
 
 def scaffold(vault_root: Path) -> list[str]:
@@ -114,6 +115,17 @@ def scaffold(vault_root: Path) -> list[str]:
             if not dest.exists():
                 shutil.copy2(src, dest)
                 actions.append(f"system-doc {src.name}")
+
+    vault_scripts = ["promote.py", "sync_fit_docs.py"]
+    scripts_dest = vault_root / "_SYSTEM" / "scripts"
+    scripts_dest.mkdir(parents=True, exist_ok=True)
+    for script_name in vault_scripts:
+        src = SCRIPTS_DIR / script_name
+        if src.exists():
+            dest = scripts_dest / script_name
+            if not dest.exists():
+                shutil.copy2(src, dest)
+                actions.append(f"script {script_name}")
 
     return actions
 
