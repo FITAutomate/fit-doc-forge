@@ -26,6 +26,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `app/` minimal real Next.js App Router scaffold (`app/app/layout.js`, `app/app/page.js`, `app/app/globals.css`, `.eslintrc.json`)
 - `app/app/drafts/page.js` read-only draft browser with markdown preview, frontmatter table, and gate status panel
 - `app/lib/vault.js` filesystem-backed vault reader for `02-DRAFTS/` and `03-REVIEW/` with safe path checks
+- `app/app/api/promote/route.js` Node.js API endpoint to run `agent/promote.py --no-commit` with path and gate validation
+- `app/app/drafts/approve-button.js` client-side approve action with status and error feedback in the draft browser
 
 ### Changed
 - Blueprint Part 0 library README table updated to match actual file paths (`README.md`, not emoji names)
@@ -46,6 +48,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `README.md` app status updated from `Placeholder` to `Scaffolded`
 - `.ai/skills/repo.md` app structure note updated to reflect the new Next.js scaffold baseline
 - `README.md` app status updated to `Active (Phase 4 PR2)` and `app/README.md` now documents vault browser behavior
+- Checked the remaining Phase 4 approve box and milestone in the blueprint
+- `README.md` app status updated to `Active (Phase 4 PR3)` and `app/README.md` now documents approve endpoint env vars
 
 ## 2026-02-26
 

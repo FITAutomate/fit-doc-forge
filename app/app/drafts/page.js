@@ -1,11 +1,12 @@
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import ApproveButton from "./approve-button";
 import { getDraftDocument, listDraftDocuments } from "../../lib/vault";
 
 function renderValue(value) {
   if (value === null || value === undefined || value === "") {
-    return "—";
+    return "--";
   }
   if (typeof value === "object") {
     return JSON.stringify(value);
@@ -76,16 +77,18 @@ export default async function DraftsPage({ searchParams }) {
     return (
       <main className="page">
         <h1>Draft Browser</h1>
-        <p>Vault root not found: <code>{listing.vaultRoot}</code></p>
-        <p>Set <code>VAULT_ROOT</code> to a valid path with <code>02-DRAFTS</code> or <code>03-REVIEW</code>.</p>
+        <p>
+          Vault root not found: <code>{listing.vaultRoot}</code>
+        </p>
+        <p>
+          Set <code>VAULT_ROOT</code> to a valid path with <code>02-DRAFTS</code> or <code>03-REVIEW</code>.
+        </p>
       </main>
     );
   }
 
   const selectedRelativePath =
-    typeof searchParams?.file === "string"
-      ? searchParams.file
-      : listing.files[0]?.relativePath;
+    typeof searchParams?.file === "string" ? searchParams.file : listing.files[0]?.relativePath;
 
   let selected = null;
   let selectedError = null;
@@ -102,7 +105,9 @@ export default async function DraftsPage({ searchParams }) {
     <main className="page">
       <header className="page-header">
         <h1>Draft Browser</h1>
-        <p>Read-only preview for vault drafts in <code>{listing.vaultRoot}</code>.</p>
+        <p>
+          Read-only preview for vault drafts in <code>{listing.vaultRoot}</code>.
+        </p>
       </header>
 
       <section className="browser-layout">
@@ -149,6 +154,11 @@ export default async function DraftsPage({ searchParams }) {
         </article>
 
         <aside className="details">
+          <ApproveButton
+            relativePath={selected?.relativePath || ""}
+            gates={selected?.gates || []}
+            status={selected?.metadata?.status || ""}
+          />
           <GatePanel gates={selected?.gates || []} />
           <FrontmatterPanel metadata={selected?.metadata || {}} />
         </aside>
