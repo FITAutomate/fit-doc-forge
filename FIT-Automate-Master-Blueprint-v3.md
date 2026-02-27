@@ -796,9 +796,9 @@ Request: [paste capture note]
 - [ ] **Milestone:** You can draft and organize content in Obsidian
 
 ### Phase 3 — Promote Script (Days 5-7)
-- [ ] `pip install pyyaml`
-- [ ] Save `fit-promote.py` to `_SYSTEM/scripts/`
-- [ ] Update `FIT_DOCS_ROOT` to your actual fit-docs path
+- [x] `pip install pyyaml`
+- [x] Save `fit-promote.py` to `_SYSTEM/scripts/` (scaffold copies automatically)
+- [x] Update `FIT_DOCS_ROOT` to your actual fit-docs path (via .env)
 - [ ] Test on a throwaway draft — confirm file lands correctly
 - [ ] Confirm `mkdocs build --strict` passes after promote
 - [ ] Install Shell Commands plugin → wire promote as a hotkey
