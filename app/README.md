@@ -10,7 +10,11 @@ npm ci
 npm run lint
 npm run build
 npm run dev
+npm run server:bg:start
+npm run server:bg:stop
 ```
+
+Default UI port is `3200` (`http://localhost:3200`).
 
 ## Scope
 
@@ -30,4 +34,12 @@ FIT_DOCS_ROOT=D:\dev\github\fit-docs\docs
 # Optional
 PYTHON_BIN=python
 FIT_FORGE_ROOT=D:\dev\github\fit-docs-forge
+```
+
+## Windows Autostart
+
+Create a scheduled task that starts the background dev server at boot:
+
+```powershell
+schtasks /Create /TN "fit-docs-forge-ui" /SC ONSTART /RL LIMITED /TR "powershell -NoProfile -ExecutionPolicy Bypass -File \"D:\dev\github\fit-docs-forge\app\scripts\start-server-bg.ps1\"" /F
 ```

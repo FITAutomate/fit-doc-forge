@@ -33,6 +33,18 @@ npm run lint
 npm run build
 ```
 
+## Local UI Ops (Windows)
+- App runs on `http://localhost:3200` by default.
+- Start in background: `cd app && npm run server:bg:start`
+- Stop background server: `cd app && npm run server:bg:stop`
+- Boot autostart (one-line PowerShell):
+```powershell
+schtasks /Create /TN "fit-docs-forge-ui" /SC ONSTART /RL LIMITED /TR "powershell -NoProfile -ExecutionPolicy Bypass -File \"D:\dev\github\fit-docs-forge\app\scripts\start-server-bg.ps1\"" /F
+```
+
+## Phase Status
+- Phase 3 (Promote Script): closed.
+
 ## Contributing
 1. Read `.ai/AGENT.md` before every session.
 2. One concern per PR, always draft first.

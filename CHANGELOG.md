@@ -28,6 +28,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `app/lib/vault.js` filesystem-backed vault reader for `02-DRAFTS/` and `03-REVIEW/` with safe path checks
 - `app/app/api/promote/route.js` Node.js API endpoint to run `agent/promote.py --no-commit` with path and gate validation
 - `app/app/drafts/approve-button.js` client-side approve action with status and error feedback in the draft browser
+- `app/scripts/start-server-bg.ps1` Windows helper to run Next.js dev server in the background
+- `app/scripts/stop-server-bg.ps1` Windows helper to stop the tracked background server process
 
 ### Changed
 - Blueprint Part 0 library README table updated to match actual file paths (`README.md`, not emoji names)
@@ -50,6 +52,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `README.md` app status updated to `Active (Phase 4 PR2)` and `app/README.md` now documents vault browser behavior
 - Checked the remaining Phase 4 approve box and milestone in the blueprint
 - `README.md` app status updated to `Active (Phase 4 PR3)` and `app/README.md` now documents approve endpoint env vars
+- `app/package.json` Next.js default `dev` and `start` ports set to `3200`
+- Root and app READMEs now document background start/stop commands plus one-line Windows boot autostart task
+- Added explicit phase status note indicating Phase 3 is closed
 
 ## 2026-02-26
 
