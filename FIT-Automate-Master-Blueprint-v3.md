@@ -795,14 +795,14 @@ Request: [paste capture note]
 - [ ] Install Tier 1 plugins
 - [ ] **Milestone:** You can draft and organize content in Obsidian
 
-### Phase 3 — Promote Script (Days 5-7)
+### Phase 3 — Promote Script (Days 5-7) ✅
 - [x] `pip install pyyaml`
 - [x] Save `fit-promote.py` to `_SYSTEM/scripts/` (scaffold copies automatically)
 - [x] Update `FIT_DOCS_ROOT` to your actual fit-docs path (via .env)
-- [ ] Test on a throwaway draft — confirm file lands correctly
-- [ ] Confirm `mkdocs build --strict` passes after promote
-- [ ] Install Shell Commands plugin → wire promote as a hotkey
-- [ ] **Milestone:** One command ships a doc from Obsidian to fit-docs
+- [x] Test on a throwaway draft — confirm file lands correctly
+- [x] Confirm `mkdocs build --strict` passes after promote
+- [x] Install Shell Commands plugin → wire promote as a hotkey
+- [x] **Milestone:** One command ships a doc from Obsidian to fit-docs
 
 ### Phase 4 — Next.js Preview UI (Week 2)
 > The fit-docs-forge `/app` directory. Preview rendered MD without opening Typora.
