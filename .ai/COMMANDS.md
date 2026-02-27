@@ -36,6 +36,18 @@ python agent/scaffold_vault.py
 ```
 Creates the full Obsidian vault folder tree at VAULT_ROOT (from `.env`, default `D:\Vaults\FIT-Vault`). Also copies templates into `_SYSTEM/templates/` and system docs into `_SYSTEM/`. Idempotent — safe to re-run.
 
+## Promote a draft (Phase 3)
+```
+python agent/promote.py "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-onboarding.md"
+```
+Validates gate fields, builds compliant filename with emoji prefix, copies body into fit-docs, archives the original, and commits to Git.
+
+Options:
+```
+python agent/promote.py --dry-run "02-DRAFTS/..."   # preview without writing
+python agent/promote.py --no-commit "02-DRAFTS/..." # promote but skip git commit
+```
+
 ## Sync fit-docs into vault (Phase 2)
 ```
 python agent/sync_fit_docs.py

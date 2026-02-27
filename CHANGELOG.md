@@ -6,6 +6,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- `agent/promote.py` — promote script from blueprint Part 6: validates gates, builds compliant filenames, routes to fit-docs, archives originals
+- 19 promote tests covering gate validation, filename building, folder routing, dry-run, and full integration flow
+- Scaffold now copies promote.py and sync_fit_docs.py into vault `_SYSTEM/scripts/`
 - `.ai/skills/changelog.md` — format rules for CHANGELOG entries
 - `agent/scaffold_vault.py` — idempotent script to create the full vault folder tree (blueprint Part 2)
 - `agent/tests/test_scaffold_vault.py` — 4 tests covering folder creation, placeholders, idempotency
