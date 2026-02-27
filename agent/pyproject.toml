@@ -1,5 +1,5 @@
 [project]
-name = "fit-doc-forge-agent"
+name = "fit-docs-forge-agent"
 version = "0.1.0"
 description = "Schema-aware drafting flows for FIT doc automation."
 requires-python = ">=3.11"
@@ -19,3 +19,5 @@ exclude = ["vault_templates*", "vault_system_docs*", "tests*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+addopts = "--basetemp=.pytest_tmp"
+cache_dir = ".pytest_tmp/.pytest_cache"

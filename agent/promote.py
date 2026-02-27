@@ -88,7 +88,7 @@ def check_gate(fm: dict) -> list[str]:
     return failures
 
 
-def resolve_target_folder(draft_rel_path: str) -> Path:
+def resolve_target_folder(draft_rel_path: str, fit_docs_root: Path = FIT_DOCS_ROOT) -> Path:
     """Map a vault-relative draft path to the correct fit-docs destination folder."""
     rel = draft_rel_path.replace("\\", "/")
     if rel.startswith("02-DRAFTS/"):
@@ -96,7 +96,7 @@ def resolve_target_folder(draft_rel_path: str) -> Path:
 
     for draft_prefix, docs_folder in sorted(DRAFT_TO_DOCS.items(), key=lambda x: -len(x[0])):
         if rel.startswith(draft_prefix + "/") or rel.startswith(draft_prefix + "\\"):
-            return FIT_DOCS_ROOT / docs_folder
+            return fit_docs_root / docs_folder
 
     raise ValueError(
         f"Cannot resolve target folder for '{draft_rel_path}'. "
@@ -161,7 +161,7 @@ def promote(
             "Gate check failed:\n" + "\n".join(f"  - {f}: must be true" for f in failures)
         )
 
-    target_folder = resolve_target_folder(draft_rel_path)
+    target_folder = resolve_target_folder(draft_rel_path, fit_docs_root)
     if not dry_run:
         target_folder.mkdir(parents=True, exist_ok=True)
 

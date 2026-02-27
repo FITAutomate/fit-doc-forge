@@ -1,6 +1,9 @@
 agent/.env
 __pycache__/
 *.pyc
+.pytest_cache/
+agent/.pytest_cache/
+.pytest_tmp/
 app/node_modules/
 app/.next/
 app/dist/

@@ -43,7 +43,7 @@ If the library README and the master YAML conflict on any field name, format, or
 Run the sync script whenever fit-docs changes:
 
 ```
-python agent/sync_fit_docs.py
+python _SYSTEM/scripts/fit-docs_sync.py
 ```
 
 This is a one-way mirror. **Never edit files in `_REFERENCE/`** — they will be overwritten on next sync.
@@ -69,7 +69,7 @@ This is a one-way mirror. **Never edit files in `_REFERENCE/`** — they will be
 2. DRAFT     → Agent reads library README → drafts into 02-DRAFTS/<library>/
 3. ELABORATE → Human edits in Obsidian
 4. REVIEW    → Move to 03-REVIEW/ when gate fields are approaching ready
-5. PROMOTE   → Run fit-promote.py → file lands in fit-docs with compliant name
+5. PROMOTE   → Run promote.py → file lands in fit-docs with compliant name
 6. ARCHIVE   → Original moves to 07-ARCHIVE/promoted/
 ```
 
@@ -99,4 +99,6 @@ Every draft must include these frontmatter booleans. All must be `true` before p
 | Published docs (vault mirror) | `_REFERENCE\fit-docs\` |
 | Agent system repo | `D:\dev\github\fit-docs-forge\` |
 | Templates | `_SYSTEM\templates\` |
-| Promote script | `_SYSTEM\scripts\fit-promote.py` |
+| Promote script | `_SYSTEM\scripts\promote.py` |
+| fit-docs sync script | `_SYSTEM\scripts\fit-docs_sync.py` |
+| Airtable sync script | `_SYSTEM\scripts\airtable_sync.py` |

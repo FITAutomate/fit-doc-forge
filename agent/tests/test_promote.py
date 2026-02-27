@@ -124,6 +124,15 @@ def test_resolve_kb():
     assert result.as_posix().endswith("Knowledge Base")
 
 
+def test_resolve_target_folder_uses_override(tmp_path: Path):
+    custom_root = tmp_path / "custom-fit-docs-root"
+    result = resolve_target_folder(
+        "02-DRAFTS/Operations/SOPs/DRAFT-sop-01.md",
+        fit_docs_root=custom_root,
+    )
+    assert result.as_posix().startswith(custom_root.as_posix())
+
+
 def test_resolve_unknown_raises():
     with pytest.raises(ValueError, match="Cannot resolve"):
         resolve_target_folder("02-DRAFTS/Unknown/file.md")
@@ -207,6 +216,6 @@ def test_promote_dry_run(tmp_path: Path):
         dry_run=True,
     )
 
-    assert "Operations" in result["target"]
+    assert Path(result["target"]).as_posix().startswith(fit_docs.as_posix())
     assert result["archive"] == ""
     assert not (fit_docs / "Operations" / "SOPs").exists()
