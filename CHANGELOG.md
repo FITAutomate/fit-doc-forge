@@ -38,6 +38,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `agent/promote.py` now resolves output paths from the provided `fit_docs_root` override
 - Script naming standardized across docs and vault system files (`promote.py`, `fit-docs_sync.py`, `airtable_sync.py`)
 - Repo naming standardized to `fit-docs-forge` in top-level metadata files
+- `agent/scaffold_vault.py` now creates `_SYSTEM/naming-conventions.md` and `_SYSTEM/tag-taxonomy.md` placeholder files for Phase 2 consistency
 
 ## 2026-02-26
 
