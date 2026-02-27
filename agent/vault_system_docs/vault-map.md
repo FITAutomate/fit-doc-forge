@@ -41,7 +41,7 @@ These mirror the `fit-docs/docs/` structure exactly:
 ## Reference Mirror (_REFERENCE/fit-docs/)
 
 One-way copy of `fit-docs/docs/` so Obsidian can index and search published content.
-Run `python agent/sync_fit_docs.py` to refresh. **Never edit files here directly.**
+Run `python _SYSTEM/scripts/fit-docs_sync.py` to refresh. **Never edit files here directly.**
 
 Contains the library README.md rules that agents must read before drafting:
 - `Operations/SOPs/README.md`
@@ -58,7 +58,7 @@ Contains the library README.md rules that agents must read before drafting:
 | `tag-taxonomy.md` | Approved tags for Obsidian |
 | `changelog.md` | Log of agent actions in the vault |
 | `templates/` | Obsidian draft templates (hotkey starting points) |
-| `scripts/` | fit-promote.py, fit-airtable-sync.py |
+| `scripts/` | promote.py, fit-docs_sync.py, airtable_sync.py |
 
 ## Naming Conventions (Quick Reference)
 

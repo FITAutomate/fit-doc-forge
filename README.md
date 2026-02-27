@@ -1,4 +1,4 @@
-# fit-doc-forge
+# fit-docs-forge
 
 AI-powered documentation pipeline for FIT Automate. Agents read library READMEs as schemas, draft and validate documents through gate fields, and promote them into the published `fit-docs` repo via a promote script.
 

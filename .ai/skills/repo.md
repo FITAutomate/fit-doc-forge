@@ -1,4 +1,4 @@
-# fit-doc-forge — Repo Map
+# fit-docs-forge — Repo Map
 
 ## Structure
 - `/agent` — Python package. All AI logic, file ops, promote scripts, and folder rewrites will live here.

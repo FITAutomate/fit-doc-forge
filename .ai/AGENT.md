@@ -1,4 +1,4 @@
-# fit-doc-forge Agent Rules
+# fit-docs-forge Agent Rules
 
 Apply these rules for every agent session in this repo:
 

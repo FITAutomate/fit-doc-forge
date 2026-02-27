@@ -211,8 +211,8 @@ D:\Vaults\FIT-Vault\
     │   ├── service-page.md
     │   └── doc-request.md
     └── scripts/
-        ├── fit-promote.py
-        └── fit-airtable-sync.py
+        ├── promote.py
+        └── airtable_sync.py
 ```
 
 ---
@@ -544,11 +544,11 @@ airtable_id: ""
 
 ## PART 6: THE PROMOTE SCRIPT
 
-> Full source: `_SYSTEM/scripts/fit-promote.py`
+> Full source: `_SYSTEM/scripts/promote.py`
 > This script is also maintained in the `fit-docs-forge` repo as the canonical version.
 
 ```python
-# _SYSTEM/scripts/fit-promote.py
+# _SYSTEM/scripts/promote.py
 # Validates gate, routes file to correct fit-docs folder,
 # builds compliant filename, strips Obsidian frontmatter, commits to Git.
 
@@ -669,7 +669,7 @@ def promote(draft_rel_path):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python fit-promote.py <vault-relative-draft-path>")
+        print("Usage: python promote.py <vault-relative-draft-path>")
         sys.exit(1)
     promote(sys.argv[1])
 ```
@@ -695,7 +695,7 @@ captured → draft → review → promote-ready → [script] → promoted
 
 4. GATE      → Flip frontmatter: status: promote-ready, gate_*: true
 
-5. PROMOTE   → python fit-promote.py "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-..."
+5. PROMOTE   → python promote.py "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-..."
                → Lands in fit-docs/docs/Operations/SOPs/📚 SOP 21 — Title.md
                → Git committed → mkdocs build --strict validates
 ```
@@ -734,7 +734,7 @@ Request: [paste capture note]
 
 ```
 07:00 daily (Windows Task Scheduler)
-  ↓  fit-airtable-sync.py
+  ↓  airtable_sync.py
      → Pulls overdue + due-today from Airtable
      → Overwrites 04-OPERATIONS/_ops-dashboard.md
 
@@ -797,7 +797,7 @@ Request: [paste capture note]
 
 ### Phase 3 — Promote Script (Days 5-7) ✅
 - [x] `pip install pyyaml`
-- [x] Save `fit-promote.py` to `_SYSTEM/scripts/` (scaffold copies automatically)
+- [x] Save `promote.py` to `_SYSTEM/scripts/` (scaffold copies automatically)
 - [x] Update `FIT_DOCS_ROOT` to your actual fit-docs path (via .env)
 - [x] Test on a throwaway draft — confirm file lands correctly
 - [x] Confirm `mkdocs build --strict` passes after promote
@@ -814,7 +814,7 @@ Request: [paste capture note]
 
 ### Phase 5 — Airtable Bridge (Week 2-3)
 - [ ] Get Airtable API key + Base/Table IDs
-- [ ] Build `fit-airtable-sync.py`
+- [ ] Build `airtable_sync.py`
 - [ ] Windows Task Scheduler: every 60 minutes
 - [ ] **Milestone:** Airtable tasks visible in Obsidian automatically
 
@@ -845,7 +845,7 @@ Request: [paste capture note]
 
 ### The Command That Ships a Doc
 ```powershell
-python D:\Vaults\FIT-Vault\_SYSTEM\scripts\fit-promote.py "02-DRAFTS/<path-to-draft>"
+python D:\Vaults\FIT-Vault\_SYSTEM\scripts\promote.py "02-DRAFTS/<path-to-draft>"
 ```
 
 ### What Belongs Where

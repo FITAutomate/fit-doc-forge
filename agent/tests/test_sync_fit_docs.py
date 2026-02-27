@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from sync_fit_docs import sync
+from fit_docs_sync import sync
 
 
 def _make_source(tmp_path: Path) -> Path:

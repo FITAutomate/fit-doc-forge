@@ -1,4 +1,4 @@
-repo: fit-doc-forge
+repo: fit-docs-forge
 repo_type: python-nextjs
 description: AI documentation pipeline for FIT Automate (agent + preview UI).
 

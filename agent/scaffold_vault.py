@@ -66,7 +66,7 @@ PLACEHOLDER_FILES: dict[str, str] = {
         "# Quick Capture\n\nDaily brain dump. Ideas, requests, voice notes.\n"
     ),
     "04-OPERATIONS/_ops-dashboard.md": (
-        "# Ops Dashboard\n\nAirtable task mirror (populated by fit-airtable-sync).\n"
+        "# Ops Dashboard\n\nAirtable task mirror (populated by airtable_sync.py).\n"
     ),
     "04-OPERATIONS/_daily-briefing.md": (
         "# Daily Briefing\n\nMorning priorities.\n"
@@ -116,7 +116,7 @@ def scaffold(vault_root: Path) -> list[str]:
                 shutil.copy2(src, dest)
                 actions.append(f"system-doc {src.name}")
 
-    vault_scripts = ["promote.py", "sync_fit_docs.py"]
+    vault_scripts = ["promote.py", "fit_docs_sync.py", "fit-docs_sync.py", "airtable_sync.py"]
     scripts_dest = vault_root / "_SYSTEM" / "scripts"
     scripts_dest.mkdir(parents=True, exist_ok=True)
     for script_name in vault_scripts:

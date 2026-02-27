@@ -40,7 +40,7 @@ python D:\dev\github\fit-docs-forge\agent\promote.py --dry-run "{{file_path:rela
 ### Sync fit-docs into vault
 
 ```
-python agent/sync_fit_docs.py
+python agent/fit-docs_sync.py
 ```
 
 One-way mirror of `fit-docs/docs/` into `_REFERENCE/fit-docs/` inside the vault. Copies new/updated files, removes deleted files. Run this after any changes to fit-docs.
@@ -49,6 +49,12 @@ One-way mirror of `fit-docs/docs/` into `_REFERENCE/fit-docs/` inside the vault.
 |---|---|
 | `--source PATH` | Override fit-docs/docs/ path |
 | `--vault PATH` | Override vault root |
+
+Legacy alias still works:
+```
+python agent/fit_docs_sync.py
+python agent/sync_fit_docs.py
+```
 
 ### Scaffold the vault
 
@@ -113,7 +119,7 @@ AIRTABLE_API_KEY=
 cd agent; pip install -e ".[dev]"
 cd ..\app; npm ci
 python agent/scaffold_vault.py
-python agent/sync_fit_docs.py
+python agent/fit-docs_sync.py
 ```
 
 ---
