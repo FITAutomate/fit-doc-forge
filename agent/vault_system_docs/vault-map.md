@@ -19,6 +19,7 @@
 | `06-CLIENTS/` | Per-client folders (overview, notes, comms) | Human |
 | `07-ARCHIVE/promoted/` | Successfully promoted drafts (moved here after publish) | Script |
 | `07-ARCHIVE/abandoned/` | Drafts that won't be published | Human |
+| `_REFERENCE/fit-docs/` | Read-only mirror of published fit-docs (synced via script) | Script |
 | `_SYSTEM/` | Templates, scripts, agent rules, vault metadata | Agent / Human |
 
 ## Draft Subfolders (02-DRAFTS/)
@@ -36,6 +37,16 @@ These mirror the `fit-docs/docs/` structure exactly:
 | `Services/` | `Services/` |
 | `Solutions/` | `Solutions/` |
 | `Test-Examples/` | `Test Examples/` |
+
+## Reference Mirror (_REFERENCE/fit-docs/)
+
+One-way copy of `fit-docs/docs/` so Obsidian can index and search published content.
+Run `python agent/sync_fit_docs.py` to refresh. **Never edit files here directly.**
+
+Contains the library README.md rules that agents must read before drafting:
+- `Operations/SOPs/README.md`
+- `Operations/Procedures/README.md`
+- `Knowledge Base/README.md`
 
 ## System Files (_SYSTEM/)
 

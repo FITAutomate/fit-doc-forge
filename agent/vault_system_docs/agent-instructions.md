@@ -9,12 +9,15 @@
 
 **This is the most important rule in the system.**
 
-Every library folder inside `fit-docs/docs/` contains a `README.md`.
+Every library folder in the published `fit-docs` repo contains a `README.md`.
 That README is the **complete specification** for every document in that folder.
+
+A read-only mirror of fit-docs lives inside this vault at `_REFERENCE/fit-docs/`.
+This is where you (and agents) find the rules and published docs without leaving Obsidian.
 
 Before an agent creates, edits, or rewrites any file in a library folder, it **must**:
 
-1. Read that folder's `README.md`
+1. Read that library's `README.md` from `_REFERENCE/fit-docs/`
 2. Extract from it:
    - File naming convention
    - Metadata table fields (the markdown table, not YAML)
@@ -29,11 +32,21 @@ If the library README and the master YAML conflict on any field name, format, or
 
 ### Current Library READMEs
 
-| Library | README Location | Controls |
+| Library | Vault path (inside `_REFERENCE/fit-docs/`) | Controls |
 |---|---|---|
-| SOPs | `docs/Operations/SOP Library Rules.md` | Naming, metadata table, required sections |
-| Procedures | `docs/Operations/Procedures Library Rules.md` | Naming, metadata table, steps format |
-| Knowledge Base | `docs/Knowledge Base/Knowledge Base Library Rules.md` | Naming, metadata table, KB_TARGET |
+| SOPs | `Operations/SOPs/README.md` | Naming, metadata table, required sections |
+| Procedures | `Operations/Procedures/README.md` | Naming, metadata table, steps format |
+| Knowledge Base | `Knowledge Base/README.md` | Naming, metadata table, KB_TARGET |
+
+### Keeping _REFERENCE/ Current
+
+Run the sync script whenever fit-docs changes:
+
+```
+python agent/sync_fit_docs.py
+```
+
+This is a one-way mirror. **Never edit files in `_REFERENCE/`** — they will be overwritten on next sync.
 
 ---
 
@@ -82,7 +95,8 @@ Every draft must include these frontmatter booleans. All must be `true` before p
 | What | Path |
 |---|---|
 | Vault root | `D:\Vaults\FIT-Vault\` |
-| Published docs | `D:\Dev\fit-docs\docs\` |
+| Published docs (external) | `D:\Dev\fit-docs\docs\` |
+| Published docs (vault mirror) | `_REFERENCE\fit-docs\` |
 | Agent system repo | `D:\dev\github\fit-docs-forge\` |
 | Templates | `_SYSTEM\templates\` |
 | Promote script | `_SYSTEM\scripts\fit-promote.py` |

@@ -64,11 +64,11 @@ If the library README and Part 4 master YAML conflict on any field name, format,
 
 ### Current Library READMEs
 
-| Library | README Location | Controls |
-|---|---|---|
-| SOPs | `docs/Operations/👮 SOP Library Rules.md` | Naming, metadata table, required sections |
-| Procedures | `docs/Operations/👮 Procedures Library Rules.md` | Naming, metadata table, steps format |
-| Knowledge Base | `docs/Knowledge Base/👮 Knowledge Base Library Rules.md` | Naming, metadata table, KB_TARGET |
+| Library | Location in fit-docs | Vault mirror path | Controls |
+|---|---|---|---|
+| SOPs | `docs/Operations/SOPs/README.md` | `_REFERENCE/fit-docs/Operations/SOPs/README.md` | Naming, metadata table, required sections |
+| Procedures | `docs/Operations/Procedures/README.md` | `_REFERENCE/fit-docs/Operations/Procedures/README.md` | Naming, metadata table, steps format |
+| Knowledge Base | `docs/Knowledge Base/README.md` | `_REFERENCE/fit-docs/Knowledge Base/README.md` | Naming, metadata table, KB_TARGET |
 
 ### Folder-Level Rewrite Command
 
