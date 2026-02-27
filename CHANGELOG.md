@@ -14,6 +14,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `agent/vault_system_docs/agent-instructions.md` — embeds Part 0 README-as-schema rule + general agent rules
 - `agent/vault_system_docs/vault-map.md` — folder structure quick reference with naming conventions
 - Scaffold script now copies system docs into `_SYSTEM/` without overwriting user edits
+- `_REFERENCE/fit-docs/` vault folder — read-only mirror of published docs for Obsidian indexing
+- `agent/sync_fit_docs.py` — one-way sync from fit-docs/docs/ into vault `_REFERENCE/`
+- 4 sync tests covering copy, update, delete, and idempotency
+
+### Changed
+- Blueprint Part 0 library README table updated to match actual file paths (README.md, not emoji names)
+- `agent-instructions.md` now points agents to `_REFERENCE/fit-docs/` for library rules
+- `vault-map.md` includes `_REFERENCE/` section
 
 ### Changed
 - Checked Phase 2 scaffold/templates/system-docs boxes in blueprint Part 10

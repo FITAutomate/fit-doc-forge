@@ -34,4 +34,15 @@ cd app && npm ci && npm run lint && npm run build
 ```
 python agent/scaffold_vault.py
 ```
-Creates the full Obsidian vault folder tree at VAULT_ROOT (from `.env`, default `D:\Vaults\FIT-Vault`). Idempotent — safe to re-run.
+Creates the full Obsidian vault folder tree at VAULT_ROOT (from `.env`, default `D:\Vaults\FIT-Vault`). Also copies templates into `_SYSTEM/templates/` and system docs into `_SYSTEM/`. Idempotent — safe to re-run.
+
+## Sync fit-docs into vault (Phase 2)
+```
+python agent/sync_fit_docs.py
+```
+One-way mirror of `fit-docs/docs/` into `_REFERENCE/fit-docs/` inside the vault. Copies new/updated files, removes deleted files. Uses FIT_DOCS_ROOT and VAULT_ROOT from `.env`.
+
+Override paths:
+```
+python agent/sync_fit_docs.py --source D:\Dev\fit-docs\docs --vault D:\Vaults\FIT-Vault
+```

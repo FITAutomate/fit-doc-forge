@@ -56,6 +56,7 @@ DIRECTORIES = [
     "06-CLIENTS",
     "07-ARCHIVE/promoted",
     "07-ARCHIVE/abandoned",
+    "_REFERENCE/fit-docs",
     "_SYSTEM/templates",
     "_SYSTEM/scripts",
 ]
