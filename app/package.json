@@ -4,10 +4,12 @@
   "private": true,
   "description": "Next.js preview UI scaffold for fit-docs-forge.",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3200",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start -p 3200",
+    "lint": "next lint",
+    "server:bg:start": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\start-server-bg.ps1",
+    "server:bg:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\stop-server-bg.ps1"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
