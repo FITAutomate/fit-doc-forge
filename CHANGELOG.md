@@ -6,6 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+- `.ai/COMMANDS.md` rewritten as full command manual with flags, Obsidian shell command syntax, gate reference, and first-time setup
 - `agent/promote.py` — promote script from blueprint Part 6: validates gates, builds compliant filenames, routes to fit-docs, archives originals
 - 19 promote tests covering gate validation, filename building, folder routing, dry-run, and full integration flow
 - Scaffold now copies promote.py and sync_fit_docs.py into vault `_SYSTEM/scripts/`
@@ -27,6 +28,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `vault-map.md` includes `_REFERENCE/` section
 
 ### Changed
+- Phase 3 complete — all promote script checklist items checked in blueprint
 - Checked Phase 2 scaffold/templates/system-docs boxes in blueprint Part 10
 - Checked all Phase 1 boxes in blueprint Part 10 — Phase 1 is complete
 - Updated `.ai/skills/repo.md` with CHANGELOG.md, .github, fit-docs key directories
