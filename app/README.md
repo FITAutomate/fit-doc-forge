@@ -1,3 +1,17 @@
-# Future Next.js app
+# Next.js App Scaffold
 
-This directory will host the Next.js preview UI that shows rendered drafts, gate status, and approval controls. For now it is intentionally empty; add `package.json`, pages, and components once the UI goes in.
+This directory now contains a minimal Next.js App Router scaffold used by the
+`nextjs-gate` CI job.
+
+## Commands
+
+```bash
+npm ci
+npm run lint
+npm run build
+```
+
+## Scope
+
+This scaffold is the Phase 4 foundation only. Vault draft browsing, frontmatter
+panels, and approve-to-promote actions are implemented in subsequent PRs.

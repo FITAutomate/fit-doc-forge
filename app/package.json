@@ -2,8 +2,20 @@
   "name": "fit-docs-forge-app",
   "version": "0.1.0",
   "private": true,
+  "description": "Next.js preview UI scaffold for fit-docs-forge.",
   "scripts": {
-    "lint": "echo \"Lint placeholder: nothing to lint yet\"",
-    "build": "echo \"Build placeholder: nothing to build yet\""
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.2.24",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.24"
   }
 }
