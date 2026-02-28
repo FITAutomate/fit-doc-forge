@@ -68,6 +68,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `agent/airtable_sync.py` default Airtable field mapping updated to `Task Name` / `Due Date` / `Status` / `Assignee Name` and console UTF-8 output handling hardened for Windows
 - `.ai/COMMANDS.md` and `agent/.env.example` now document `AIRTABLE_USE_FIELD_IDS` for robust Airtable field mapping
 - `.ai/COMMANDS.md` and `agent/.env.example` now include base/table/view display name and top-link settings for dashboard output
+- `FIT-Automate-Master-Blueprint-v3.md` upgraded to v3.5 with new Phase 5.5 Safety & Observability section, Part 2/Part 4 additions, corrected Part 6 promote sequence, and Part 10 rollout updates
 - Pytest temp/cache config now uses repo-local `.pytest_scratch/` to avoid Windows temp-folder permission issues that caused slow/hanging test runs
 - Checked Phase 5 scheduler and milestone boxes in the blueprint
 - `agent/.env.example` now includes Airtable base/table/view/field configuration variables
