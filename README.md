@@ -64,7 +64,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forg
 
 ## Phase Status
 - Phase 3 (Promote Script): closed.
-- Phase 5 (Airtable Bridge): in progress (PR1 - `airtable_sync.py`).
+- Phase 5 (Airtable Bridge): closed.
+- Phase 5.5 (System Safety & Observability): next PR sequence.
 
 ## Contributing
 1. Read `.ai/AGENT.md` before every session.
