@@ -25,6 +25,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `agent/airtable_sync.py --inspect-fields` mode to print discovered column names and status counts before syncing
 - Airtable record links in ops dashboard now use full app/table/view/record URLs and display friendly labels (`Open`) instead of raw `rec...` IDs
 - `agent/airtable_sync.py` now supports field-ID mode (`AIRTABLE_USE_FIELD_IDS` / `--use-field-ids`) so schema renames won't break mapping
+- Ops dashboard header now displays Airtable base/table/view names (with metadata lookup + env overrides), includes one top configurable board-view link, and removes the redundant Airtable link column
+- Ops dashboard task table now includes a `Priority` column sourced from configurable field mapping (`AIRTABLE_PRIORITY_FIELD`)
 - `agent/tests/test_airtable_sync.py` coverage for Airtable URL building, pagination, filtering, and dashboard file writes
 - `pytest.ini` at repo root so `pytest` resolves `agent/` modules when run from repo root
 - 4 sync tests covering copy, update, delete, and idempotency
@@ -63,6 +65,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `.ai/COMMANDS.md` now documents `airtable_sync.py` usage and Airtable env variables
 - `agent/airtable_sync.py` default Airtable field mapping updated to `Task Name` / `Due Date` / `Status` / `Assignee Name` and console UTF-8 output handling hardened for Windows
 - `.ai/COMMANDS.md` and `agent/.env.example` now document `AIRTABLE_USE_FIELD_IDS` for robust Airtable field mapping
+- `.ai/COMMANDS.md` and `agent/.env.example` now include base/table/view display name and top-link settings for dashboard output
 - `agent/.env.example` now includes Airtable base/table/view/field configuration variables
 - Checked the Phase 5 `Build airtable_sync.py` box in the blueprint
 

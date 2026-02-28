@@ -71,10 +71,16 @@ Pulls Airtable tasks, filters overdue and due-today items, and writes `04-OPERAT
 | `--base-id ID` | Override Airtable base ID |
 | `--table-id ID_OR_NAME` | Override Airtable table |
 | `--view NAME` | Optional Airtable view |
+| `--base-name NAME` | Force dashboard display name for base |
+| `--table-name NAME` | Force dashboard display name for table |
+| `--view-name NAME` | Force dashboard display name for view |
+| `--dashboard-view-url URL` | Add single top-of-dashboard link to this Airtable view |
+| `--dashboard-view-label TEXT` | Label for the top view link |
 | `--due-field FIELD` | Due date field name (default `Due Date`) |
 | `--title-field FIELD` | Task title field name (default `Task Name`) |
 | `--status-field FIELD` | Task status field name (default `Status`) |
 | `--owner-field FIELD` | Task owner field name (default `Assignee Name`) |
+| `--priority-field FIELD` | Task priority field name (default `Priority`) |
 | `--use-field-ids` | Treat `AIRTABLE_*_FIELD` values as Airtable field IDs (`fld...`) |
 | `--max-records N` | Max records to process (default `500`) |
 | `--today YYYY-MM-DD` | Override current date for deterministic runs |
@@ -138,10 +144,16 @@ AIRTABLE_API_KEY=
 AIRTABLE_BASE_ID=
 AIRTABLE_TABLE_ID=
 AIRTABLE_VIEW=
+AIRTABLE_BASE_NAME=
+AIRTABLE_TABLE_NAME=
+AIRTABLE_VIEW_NAME=
+AIRTABLE_DASHBOARD_VIEW_URL=
+AIRTABLE_DASHBOARD_VIEW_LABEL=Open board view
 AIRTABLE_DUE_FIELD=Due Date
 AIRTABLE_TITLE_FIELD=Task Name
 AIRTABLE_STATUS_FIELD=Status
 AIRTABLE_OWNER_FIELD=Assignee Name
+AIRTABLE_PRIORITY_FIELD=Priority
 AIRTABLE_USE_FIELD_IDS=false
 AIRTABLE_MAX_RECORDS=500
 ```

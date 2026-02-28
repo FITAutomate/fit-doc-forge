@@ -36,6 +36,7 @@ class AirtableTask:
     due: date
     title: str
     owner: str
+    priority: str
     status: str
 
 
@@ -128,6 +129,107 @@ def build_airtable_record_url(
     return f"https://airtable.com/{'/'.join(parts)}"
 
 
+def _fetch_base_name(
+    api_key: str,
+    base_id: str,
+    fetcher: Callable[[str, str], dict[str, Any]] | None = None,
+) -> str:
+    real_fetcher = fetcher or fetch_json
+    data = real_fetcher(f"{AIRTABLE_API_BASE}/meta/bases", api_key)
+    bases = data.get("bases", [])
+    if not isinstance(bases, list):
+        return ""
+    for base in bases:
+        if not isinstance(base, dict):
+            continue
+        if str(base.get("id", "")).strip() == base_id:
+            return _field_to_text(base.get("name"))
+    return ""
+
+
+def _fetch_table_and_view_names(
+    api_key: str,
+    base_id: str,
+    *,
+    table_id: str,
+    view_id: str,
+    fetcher: Callable[[str, str], dict[str, Any]] | None = None,
+) -> tuple[str, str]:
+    real_fetcher = fetcher or fetch_json
+    encoded_base = quote(base_id, safe="")
+    data = real_fetcher(f"{AIRTABLE_API_BASE}/meta/bases/{encoded_base}/tables", api_key)
+    tables = data.get("tables", [])
+    if not isinstance(tables, list):
+        return "", ""
+
+    found_table_name = ""
+    found_view_name = ""
+    for table in tables:
+        if not isinstance(table, dict):
+            continue
+        table_match = str(table.get("id", "")).strip() == table_id or _field_to_text(table.get("name")) == table_id
+        if not table_match:
+            continue
+        found_table_name = _field_to_text(table.get("name"))
+        views = table.get("views", [])
+        if not isinstance(views, list):
+            break
+        for view in views:
+            if not isinstance(view, dict):
+                continue
+            view_match = str(view.get("id", "")).strip() == view_id or _field_to_text(view.get("name")) == view_id
+            if view_match:
+                found_view_name = _field_to_text(view.get("name"))
+                break
+        break
+
+    return found_table_name, found_view_name
+
+
+def resolve_airtable_display_names(
+    *,
+    api_key: str,
+    base_id: str,
+    table_id: str,
+    view: str,
+    base_name: str = "",
+    table_name: str = "",
+    view_name: str = "",
+    fetcher: Callable[[str, str], dict[str, Any]] | None = None,
+) -> tuple[str, str, str]:
+    resolved_base = base_name.strip() if base_name else ""
+    resolved_table = table_name.strip() if table_name else ""
+    resolved_view = view_name.strip() if view_name else ""
+
+    if resolved_base and resolved_table and (resolved_view or not view):
+        return resolved_base, resolved_table, resolved_view
+
+    try:
+        if not resolved_base:
+            resolved_base = _fetch_base_name(api_key, base_id, fetcher=fetcher)
+        if (not resolved_table) or (view and not resolved_view):
+            table_display, view_display = _fetch_table_and_view_names(
+                api_key,
+                base_id,
+                table_id=table_id,
+                view_id=view,
+                fetcher=fetcher,
+            )
+            if not resolved_table:
+                resolved_table = table_display
+            if view and not resolved_view:
+                resolved_view = view_display
+    except RuntimeError:
+        # Metadata scopes may be unavailable; fall back to IDs.
+        pass
+
+    return (
+        resolved_base or base_id,
+        resolved_table or table_id,
+        resolved_view or (view or "(none)"),
+    )
+
+
 def fetch_json(url: str, api_key: str) -> dict[str, Any]:
     req = Request(
         url,
@@ -192,6 +294,7 @@ def record_to_task(
     title_field: str,
     status_field: str,
     owner_field: str,
+    priority_field: str,
     completed_statuses: set[str],
 ) -> AirtableTask | None:
     fields = record.get("fields", {})
@@ -212,12 +315,14 @@ def record_to_task(
     if not title:
         title = f"(untitled task {record_id or 'unknown'})"
     owner = _field_to_text(fields.get(owner_field)) if owner_field else ""
+    priority = _field_to_text(fields.get(priority_field)) if priority_field else ""
 
     return AirtableTask(
         record_id=record_id or "unknown",
         due=due_value,
         title=title,
         owner=owner,
+        priority=priority or "-",
         status=status or "unspecified",
     )
 
@@ -241,12 +346,11 @@ def _render_section(
         return ["_None._"]
 
     lines = [
-        "| Due | Task | Owner | Status | Airtable |",
+        "| Due | Task | Owner | Priority | Status |",
         "|---|---|---|---|---|",
     ]
     for task in tasks:
         task_label = _escape_table_cell(task.title)
-        record_label = "-"
         if base_id and table_id and task.record_id != "unknown":
             record_url = build_airtable_record_url(
                 base_id=base_id,
@@ -255,7 +359,6 @@ def _render_section(
                 record_id=task.record_id,
             )
             task_label = f"[{_escape_link_text(task_label)}]({record_url})"
-            record_label = f"[Open]({record_url})"
         lines.append(
             "| "
             + " | ".join(
@@ -263,8 +366,8 @@ def _render_section(
                     str(task.due),
                     task_label,
                     _escape_table_cell(task.owner or "-"),
+                    _escape_table_cell(task.priority or "-"),
                     _escape_table_cell(task.status),
-                    record_label,
                 ]
             )
             + " |"
@@ -277,9 +380,14 @@ def render_dashboard(
     overdue: list[AirtableTask],
     due_today: list[AirtableTask],
     generated_at: datetime,
+    base_name: str,
+    table_name: str,
+    view_name: str,
     base_id: str,
     table_id: str,
     view: str,
+    dashboard_view_url: str = "",
+    dashboard_view_label: str = "Open board view",
 ) -> str:
     timestamp = generated_at.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     lines: list[str] = [
@@ -288,12 +396,23 @@ def render_dashboard(
         "Airtable task mirror (overdue + due today).",
         "",
         f"- Last sync: {timestamp}",
-        f"- Airtable base: {base_id}",
-        f"- Airtable table: {table_id}",
-        f"- Airtable view: {view or '(none)'}",
+        f"- Airtable base: {base_name}",
+        f"- Airtable table: {table_name}",
+        f"- Airtable view: {view_name}",
+    ]
+    if dashboard_view_url:
+        lines.extend(
+            [
+                "",
+                f"[{dashboard_view_label}]({dashboard_view_url})",
+            ]
+        )
+    lines.extend(
+        [
         "",
         "## Overdue",
-    ]
+        ]
+    )
     lines.extend(_render_section(overdue, base_id=base_id, table_id=table_id, view=view))
     lines.extend(["", "## Due Today"])
     lines.extend(_render_section(due_today, base_id=base_id, table_id=table_id, view=view))
@@ -317,10 +436,16 @@ def sync(
     table_id: str,
     vault_root: Path,
     view: str = "",
-    due_field: str = "Due",
-    title_field: str = "Task",
+    due_field: str = "Due Date",
+    title_field: str = "Task Name",
     status_field: str = "Status",
-    owner_field: str = "Owner",
+    owner_field: str = "Assignee Name",
+    priority_field: str = "Priority",
+    base_name: str = "",
+    table_name: str = "",
+    view_name: str = "",
+    dashboard_view_url: str = "",
+    dashboard_view_label: str = "Open board view",
     max_records: int = 500,
     use_field_ids: bool = False,
     dry_run: bool = False,
@@ -346,6 +471,7 @@ def sync(
             title_field=title_field,
             status_field=status_field,
             owner_field=owner_field,
+            priority_field=priority_field,
             completed_statuses=completed_statuses,
         )
         if task:
@@ -353,14 +479,29 @@ def sync(
 
     ref_day = today or date.today()
     overdue, due_today = split_tasks(tasks, today=ref_day)
+    resolved_base_name, resolved_table_name, resolved_view_name = resolve_airtable_display_names(
+        api_key=api_key,
+        base_id=base_id,
+        table_id=table_id,
+        view=view,
+        base_name=base_name,
+        table_name=table_name,
+        view_name=view_name,
+        fetcher=fetcher,
+    )
 
     rendered = render_dashboard(
         overdue=overdue,
         due_today=due_today,
         generated_at=datetime.now(timezone.utc),
+        base_name=resolved_base_name,
+        table_name=resolved_table_name,
+        view_name=resolved_view_name,
         base_id=base_id,
         table_id=table_id,
         view=view,
+        dashboard_view_url=dashboard_view_url,
+        dashboard_view_label=dashboard_view_label,
     )
 
     target = vault_root / "04-OPERATIONS" / "_ops-dashboard.md"
@@ -375,6 +516,9 @@ def sync(
         "written": not dry_run,
         "target": str(target),
         "dashboard": rendered,
+        "base_name": resolved_base_name,
+        "table_name": resolved_table_name,
+        "view_name": resolved_view_name,
     }
 
 
@@ -441,10 +585,24 @@ def main() -> None:
     parser.add_argument("--base-id", default=os.getenv("AIRTABLE_BASE_ID", ""), help="Airtable base ID")
     parser.add_argument("--table-id", default=os.getenv("AIRTABLE_TABLE_ID", ""), help="Airtable table ID/name")
     parser.add_argument("--view", default=os.getenv("AIRTABLE_VIEW", ""), help="Optional Airtable view")
+    parser.add_argument("--base-name", default=os.getenv("AIRTABLE_BASE_NAME", ""), help="Display name for Airtable base")
+    parser.add_argument("--table-name", default=os.getenv("AIRTABLE_TABLE_NAME", ""), help="Display name for Airtable table")
+    parser.add_argument("--view-name", default=os.getenv("AIRTABLE_VIEW_NAME", ""), help="Display name for Airtable view")
+    parser.add_argument(
+        "--dashboard-view-url",
+        default=os.getenv("AIRTABLE_DASHBOARD_VIEW_URL", ""),
+        help="Top-of-dashboard link to Airtable board view",
+    )
+    parser.add_argument(
+        "--dashboard-view-label",
+        default=os.getenv("AIRTABLE_DASHBOARD_VIEW_LABEL", "Open board view"),
+        help="Label text for the top-of-dashboard view link",
+    )
     parser.add_argument("--due-field", default=os.getenv("AIRTABLE_DUE_FIELD", "Due Date"), help="Due date field")
     parser.add_argument("--title-field", default=os.getenv("AIRTABLE_TITLE_FIELD", "Task Name"), help="Task title field")
     parser.add_argument("--status-field", default=os.getenv("AIRTABLE_STATUS_FIELD", "Status"), help="Task status field")
     parser.add_argument("--owner-field", default=os.getenv("AIRTABLE_OWNER_FIELD", "Assignee Name"), help="Task owner field")
+    parser.add_argument("--priority-field", default=os.getenv("AIRTABLE_PRIORITY_FIELD", "Priority"), help="Task priority field")
     parser.add_argument(
         "--use-field-ids",
         action="store_true",
@@ -491,7 +649,7 @@ def main() -> None:
 
     resolved_use_field_ids = args.use_field_ids or any(
         _looks_like_field_id(value)
-        for value in [args.due_field, args.title_field, args.status_field, args.owner_field]
+        for value in [args.due_field, args.title_field, args.status_field, args.owner_field, args.priority_field]
     )
 
     try:
@@ -524,6 +682,12 @@ def main() -> None:
             title_field=args.title_field,
             status_field=args.status_field,
             owner_field=args.owner_field,
+            priority_field=args.priority_field,
+            base_name=args.base_name,
+            table_name=args.table_name,
+            view_name=args.view_name,
+            dashboard_view_url=args.dashboard_view_url,
+            dashboard_view_label=args.dashboard_view_label,
             max_records=args.max_records,
             use_field_ids=resolved_use_field_ids,
             vault_root=args.vault,
