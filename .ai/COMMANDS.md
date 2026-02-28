@@ -50,6 +50,20 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forg
 The wrapper writes persistent command output to:
 `D:\Vaults\FIT-Vault\_SYSTEM\logs\shell-command.log`
 
+Obsidian shell command examples:
+
+Dry run rollback:
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$log='D:\Vaults\FIT-Vault\_SYSTEM\logs\shell-command.log'; Add-Content $log \"`n--- $(Get-Date -Format o) ROLLBACK-DRY-RUN <published-filename>.md ---\"; $env:PATH='D:\dev\github\fit-docs\venv\Scripts;' + $env:PATH; & 'D:\dev\github\fit-docs\venv\Scripts\python.exe' 'D:\dev\github\fit-docs-forge\agent\rollback.py' '<published-filename>.md' --dry-run 2>&1 | Tee-Object -FilePath $log -Append"
+```
+
+Real rollback:
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$log='D:\Vaults\FIT-Vault\_SYSTEM\logs\shell-command.log'; Add-Content $log \"`n--- $(Get-Date -Format o) ROLLBACK <published-filename>.md ---\"; $env:PATH='D:\dev\github\fit-docs\venv\Scripts;' + $env:PATH; & 'D:\dev\github\fit-docs\venv\Scripts\python.exe' 'D:\dev\github\fit-docs-forge\agent\rollback.py' '<published-filename>.md' 2>&1 | Tee-Object -FilePath $log -Append"
+```
+
+Note: rollback operates on the published filename in `fit-docs/docs/...`, so replace `<published-filename>.md` before running.
+
 ### Sync fit-docs into vault
 
 ```

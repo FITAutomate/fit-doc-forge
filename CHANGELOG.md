@@ -81,6 +81,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `agent/promote.py` now treats no-diff re-promotes as successful idempotent runs (skips commit gracefully) and appends `PROMOTE_FAILED` audit entries on failed promote stages
 - `agent/tests/test_promote.py` expanded with no-diff commit skip coverage plus failure-audit coverage for validation, mkdocs, and git-diff failures
 - `.ai/COMMANDS.md` and `README.md` now document Obsidian wrapper usage (`run-promote.ps1`), promote no-diff behavior, and `PROMOTE_FAILED` audit visibility
+- `.ai/COMMANDS.md` now includes explicit Obsidian Shell Command templates for promote and rollback (dry-run and real) with persistent `shell-command.log` capture
 - Issue template blueprint-phase dropdown now includes `Phase 5.5 - System Safety & Observability` and normalized phase labels to ASCII
 
 ## 2026-02-26
