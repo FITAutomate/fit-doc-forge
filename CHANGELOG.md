@@ -40,6 +40,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `app/app/drafts/approve-button.js` client-side approve action with status and error feedback in the draft browser
 - `app/scripts/start-server-bg.ps1` Windows helper to run Next.js dev server in the background
 - `app/scripts/stop-server-bg.ps1` Windows helper to stop the tracked background server process
+- `agent/rollback.py` Phase 5.5.2 rollback CLI using audit-log lookup with `--dry-run` support and audit events (`ROLLBACK_DRY_RUN`, `ROLLBACK_SUCCESS`)
+- `agent/tests/test_rollback.py` coverage for audit parsing, latest promote lookup, dry-run behavior, and full rollback flow
+- Scaffold now copies `rollback.py` into vault `_SYSTEM/scripts/`
 - `agent/promote.py` now runs `mkdocs build --strict` before commit and appends `_SYSTEM/logs/audit-log.md` only after successful git commit
 - Promote tests now cover mkdocs failure cleanup and successful audit-log append behavior
 
@@ -77,6 +80,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Checked Phase 5 scheduler and milestone boxes in the blueprint
 - `agent/.env.example` now includes Airtable base/table/view/field configuration variables
 - Checked the Phase 5 `Build airtable_sync.py` box in the blueprint
+- `.ai/COMMANDS.md` rewritten for IDs-first Airtable mapping and now documents promote audit behavior plus rollback operations
+- `README.md` updated with current Phase 5.5 status and safety/observability notes
+- `.ai/AGENT.md`, `.ai/skills/tests.md`, `.ai/skills/repo.md`, `.ai/piv.config.yaml`, and PR template now include explicit documentation-parity guardrails
+- `agent/.env.example` now defaults to IDs-first Airtable field mapping (`AIRTABLE_USE_FIELD_IDS=true`)
+- Checked remaining Phase 2 rollout checklist items in blueprint Part 10 (Obsidian + Tier 1 plugins + milestone)
 - Issue template blueprint-phase dropdown now includes `Phase 5.5 - System Safety & Observability` and normalized phase labels to ASCII
 
 ## 2026-02-26

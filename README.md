@@ -9,7 +9,7 @@ The full plan lives in [`FIT-Automate-Master-Blueprint-v3.md`](FIT-Automate-Mast
 |---|---|---|
 | `.ai/` | Agent rules, commands, config, templates, skills | Active |
 | `.github/` | CI workflows, Dependabot, PR/issue templates | Active |
-| `agent/` | Python package - AI logic, promote script, folder rewrites | Skeleton |
+| `agent/` | Python package - AI logic, promote/rollback scripts, folder rewrites | Active (Phase 5.5) |
 | `app/` | Next.js - preview UI, gate status, approve-to-promote | Active (Phase 4 PR3) |
 | `FIT-Automate-Master-Blueprint-v3.md` | The master plan (7 phases) | Active |
 | `CHANGELOG.md` | Running history of every merged change | Active |
@@ -49,6 +49,10 @@ python airtable_sync.py --dry-run
 python airtable_sync.py
 ```
 
+Field mapping note:
+- Team default is field IDs (`fld...`) with `AIRTABLE_USE_FIELD_IDS=true`.
+- Use `python airtable_sync.py --inspect-fields` before mapping or remapping fields.
+
 ### Airtable Schedule (Windows)
 Run hourly from `08:00` to `22:00`:
 
@@ -63,9 +67,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forg
 ```
 
 ## Phase Status
+- Phase 2 (Vault Foundation): closed.
 - Phase 3 (Promote Script): closed.
 - Phase 5 (Airtable Bridge): closed.
-- Phase 5.5 (System Safety & Observability): next PR sequence.
+- Phase 5.5.1 (Audit Trail Log): closed.
+- Phase 5.5.2 (Rollback Script): in progress.
+
+## Safety & Observability
+- Promote now validates strict build before commit and writes audit entries to `_SYSTEM/logs/audit-log.md` on successful commit.
+- Rollback flow is implemented in `agent/rollback.py` and can run in dry-run mode before changing files.
+- See `.ai/COMMANDS.md` for current promote/rollback operational commands.
 
 ## Contributing
 1. Read `.ai/AGENT.md` before every session.

@@ -15,6 +15,14 @@ EXPECTED_SYSTEM_DOCS = [
     "vault-map.md",
 ]
 
+EXPECTED_SCRIPTS = [
+    "promote.py",
+    "rollback.py",
+    "fit_docs_sync.py",
+    "fit-docs_sync.py",
+    "airtable_sync.py",
+]
+
 
 def test_scaffold_creates_all_directories(tmp_path: Path):
     scaffold(tmp_path)
@@ -48,6 +56,13 @@ def test_scaffold_copies_system_docs(tmp_path: Path):
         assert dest.exists(), f"Missing system doc: {name}"
         src = SYSTEM_DOCS_DIR / name
         assert dest.read_text(encoding="utf-8") == src.read_text(encoding="utf-8")
+
+
+def test_scaffold_copies_scripts(tmp_path: Path):
+    scaffold(tmp_path)
+    scripts_dir = tmp_path / "_SYSTEM" / "scripts"
+    for name in EXPECTED_SCRIPTS:
+        assert (scripts_dir / name).exists(), f"Missing script: {name}"
 
 
 def test_scaffold_does_not_overwrite_user_templates(tmp_path: Path):

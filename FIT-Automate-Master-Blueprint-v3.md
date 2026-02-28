@@ -1514,9 +1514,9 @@ Request: [paste capture note]
 - [x] Create all 5 templates in `_SYSTEM/templates/` (Part 5 defines 5; 2 more TBD)
 - [x] Create `_SYSTEM/agent-instructions.md` (embed Part 0 README-as-schema rule)
 - [x] Create `_SYSTEM/vault-map.md`
-- [ ] Install Obsidian -> open FIT-Vault
-- [ ] Install Tier 1 plugins
-- [ ] **Milestone:** You can draft and organize content in Obsidian
+- [x] Install Obsidian -> open FIT-Vault
+- [x] Install Tier 1 plugins
+- [x] **Milestone:** You can draft and organize content in Obsidian
 
 ### Phase 3 - Promote Script (Days 5-7) [done]
 

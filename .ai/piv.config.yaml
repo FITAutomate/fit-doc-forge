@@ -31,3 +31,16 @@ pr_discipline:
   max_concerns_per_pr: 1
   draft_first: true
   validation_evidence_required: true
+
+docs_parity:
+  changelog_required: true
+  readme_required_when_phase_or_workflow_changes: true
+  commands_required_when_cli_or_env_changes: true
+  env_example_required_when_env_strategy_changes: true
+  promote_rollback_audit_require_dual_doc_updates:
+    - README.md
+    - .ai/COMMANDS.md
+
+airtable_policy:
+  preferred_mapping: field_ids
+  required_toggle: AIRTABLE_USE_FIELD_IDS=true
