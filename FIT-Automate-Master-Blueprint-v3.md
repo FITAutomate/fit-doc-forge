@@ -1,4 +1,7 @@
-﻿# FIT Automate — Obsidian + MkDocs PIV Pipeline | Master Blueprint v3.5
+<!-- markdownlint-disable MD013 -->
+
+# FIT Automate - Obsidian + MkDocs PIV Pipeline | Master Blueprint v3.5
+
 **Windows Local | AI-Agnostic | Single Source of Truth**
 *Supersedes v2.0*
 
@@ -10,22 +13,23 @@ Obsidian is your pre-commit authoring workspace (Plan + Implement).
 fit-docs is your published source of truth (Validate + Publish).
 A promote script is the only bridge between them.
 
-```
-Brain â†’ Obsidian (capture â†’ draft â†’ gate) â†’ promote script â†’ fit-docs commit â†’ CI â†’ Live
+```text
+Brain -> Obsidian (capture -> draft -> gate) -> promote script -> fit-docs commit -> CI -> Live
 ```
 
 ---
 
-## ⚡ WHAT'S NEW IN v3.5
+## WHAT'S NEW IN v3.5
 
-- **README-as-Schema rule** added as Part 0 â€” the foundational rule all agents must follow
+- **README-as-Schema rule** added as Part 0 - the foundational rule all agents must follow
 - **fit-docs-forge** introduced as the agent system repo that powers this pipeline
-- Part 4 YAML clarified: universal base only â€” library READMEs override
+- Part 4 YAML clarified: universal base only - library READMEs override
 - Part 10 phased rollout updated to reflect forge-first build order
-- Phase 5.5 Safety & Observability layer added — Audit Trail, Rollback, Health Dashboard, Dependency Graph, Template Diff Alerter
+- Phase 5.5 Safety & Observability layer added - Audit Trail, Rollback, Health Dashboard, Dependency Graph, Template Diff Alerter
+
 ---
 
-## PART 0: README-AS-SCHEMA RULE (Agent Law â€” Read First)
+## PART 0: README-AS-SCHEMA RULE (Agent Law - Read First)
 
 > **This is the most important rule in the system. Every agent must follow it before touching any file.**
 
@@ -42,29 +46,30 @@ Before an agent creates, edits, or rewrites any file in a library folder, it **m
    - Metadata table fields (the markdown table, not YAML)
    - Required H2/H3 sections in order
    - Content rules and restrictions
-3. Apply only what the README defines â€” nothing invented, nothing from memory
+3. Apply only what the README defines - nothing invented, nothing from memory
 
 ### Why This Exists
 
-The master YAML in Part 4 is a universal base â€” it captures fields shared across all doc types.
+The master YAML in Part 4 is a universal base - it captures fields shared across all doc types.
 But each library has its own shape. The SOP README defines RACI tables. The KB README defines
 `KB_TARGET`. The Procedure README defines numbered H3 steps. These rules live in the README,
 not in the agent prompt.
 
 This means:
-- You update one README â†’ re-run the agent â†’ every file in that folder conforms
+
+- You update one README -> re-run the agent -> every file in that folder conforms
 - No hardcoded templates to maintain in code
 - No divergence between what the README says and what the agent does
 
 ### The Override Rule
 
-If the library README and Part 4 master YAML conflict on any field name, format, or structure â€”
+If the library README and Part 4 master YAML conflict on any field name, format, or structure -
 **the README wins.**
 
 ### Current Library READMEs
 
 | Library | Location in fit-docs | Vault mirror path | Controls |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | SOPs | `docs/Operations/SOPs/README.md` | `_REFERENCE/fit-docs/Operations/SOPs/README.md` | Naming, metadata table, required sections |
 | Procedures | `docs/Operations/Procedures/README.md` | `_REFERENCE/fit-docs/Operations/Procedures/README.md` | Naming, metadata table, steps format |
 | Knowledge Base | `docs/Knowledge Base/README.md` | `_REFERENCE/fit-docs/Knowledge Base/README.md` | Naming, metadata table, KB_TARGET |
@@ -77,51 +82,51 @@ When you want to rewrite an entire library to a new spec:
 2. Run: `fit-forge rewrite --folder Operations/SOPs`
 3. Agent reads the updated README, diffs every file, rewrites non-conforming files
 4. You review diffs in the Next.js preview UI
-5. You approve â†’ promote script runs for each file
+5. You approve -> promote script runs for each file
 
 ---
 
 ## PART 1: FIT-DOCS STRUCTURE (Actual, as-built)
 
-This is what exists in your repo. Never duplicated in Obsidian â€” only fed by it.
+This is what exists in your repo. Never duplicated in Obsidian - only fed by it.
 
-```
+```text
 fit-docs/docs/
-â”œâ”€â”€ blog/
-â”‚   â””â”€â”€ posts/                        â† Agent daily briefings land here
-â”œâ”€â”€ Finance/                          â† Scaffolded / Coming Soon
-â”‚   â”œâ”€â”€ receipts/
-â”‚   â”œâ”€â”€ invoices/
-â”‚   â””â”€â”€ subscriptions/
-â”œâ”€â”€ home/
-â”‚   â”œâ”€â”€ index.md                      â† mkdocs_hooks.py Daily Snapshot target
-â”‚   â”œâ”€â”€ about.md
-â”‚   â””â”€â”€ status.md
-â”œâ”€â”€ Knowledge Base/                   â† Client-facing KB articles
-â”‚   â””â”€â”€ ðŸ‘® Knowledge Base Library Rules.md   â† README-as-schema source
-â”œâ”€â”€ Operations/                       â† Internal governance
-â”‚   â”œâ”€â”€ ðŸ‘® SOP Library Rules.md               â† README-as-schema source
-â”‚   â”œâ”€â”€ ðŸ‘® Procedures Library Rules.md        â† README-as-schema source
-â”‚   â”œâ”€â”€ SOPs/                         â† ðŸ“š SOP NN â€” Title.md
-â”‚   â””â”€â”€ Procedures/                   â† ðŸ“‹ PROC â€” System â€” Title.md
-â”œâ”€â”€ project/                          â† PIV bootstrap + active project docs
-â”œâ”€â”€ Services/
-â”‚   â”œâ”€â”€ ai-readiness-audit.md
-â”‚   â”œâ”€â”€ intelligent-automation.md
-â”‚   â””â”€â”€ ai-enablement.md
-â”œâ”€â”€ Solutions/
-â”‚   â”œâ”€â”€ fit-docs/
-â”‚   â”‚   â”œâ”€â”€ description.md
-â”‚   â”‚   â””â”€â”€ README.md
-â”‚   â”œâ”€â”€ fit-web/
-â”‚   â”‚   â”œâ”€â”€ description.md
-â”‚   â”‚   â””â”€â”€ README.md
-â”‚   â””â”€â”€ fit-rag/
-â”‚       â”œâ”€â”€ description.md
-â”‚       â””â”€â”€ README.md
-â”œâ”€â”€ stylesheets/                      â† Platform only, never authored
-â”œâ”€â”€ Test Examples/                    â† Sandbox, scaffold only
-â””â”€â”€ index.md
+|-- blog/
+|   \-- posts/                        <- Agent daily briefings land here
+|-- Finance/                          <- Scaffolded / Coming Soon
+|   |-- receipts/
+|   |-- invoices/
+|   \-- subscriptions/
+|-- home/
+|   |-- index.md                      <- mkdocs_hooks.py Daily Snapshot target
+|   |-- about.md
+|   \-- status.md
+|-- Knowledge Base/                   <- Client-facing KB articles
+|   \-- [RULE] Knowledge Base Library Rules.md   <- README-as-schema source
+|-- Operations/                       <- Internal governance
+|   |-- [RULE] SOP Library Rules.md               <- README-as-schema source
+|   |-- [RULE] Procedures Library Rules.md        <- README-as-schema source
+|   |-- SOPs/                         <- [SOP] SOP NN - Title.md
+|   \-- Procedures/                   <- [PROC] PROC - System - Title.md
+|-- project/                          <- PIV bootstrap + active project docs
+|-- Services/
+|   |-- ai-readiness-audit.md
+|   |-- intelligent-automation.md
+|   \-- ai-enablement.md
+|-- Solutions/
+|   |-- fit-docs/
+|   |   |-- description.md
+|   |   \-- README.md
+|   |-- fit-web/
+|   |   |-- description.md
+|   |   \-- README.md
+|   \-- fit-rag/
+|       |-- description.md
+|       \-- README.md
+|-- stylesheets/                      <- Platform only, never authored
+|-- Test Examples/                    <- Sandbox, scaffold only
+\-- index.md
 ```
 
 ---
@@ -132,96 +137,96 @@ Location: `D:\Vaults\FIT-Vault\`
 
 `02-DRAFTS/` mirrors `fit-docs/docs/` exactly. Every other folder serves authoring and operations.
 
-```
+```text
 D:\Vaults\FIT-Vault\
-â”‚
-â”œâ”€â”€ 00-INBOX/
-â”‚   â”œâ”€â”€ _quick-capture.md             â† Daily brain dump. Ideas, requests, voice notes.
-â”‚   â””â”€â”€ _agent-drop/                  â† Agents write first drafts here for your review
-â”‚
-â”œâ”€â”€ 01-PLANNING/
-â”‚   â”œâ”€â”€ ideas/
-â”‚   â”œâ”€â”€ requests/
-â”‚   â”‚   â”œâ”€â”€ sop-requests/
-â”‚   â”‚   â”œâ”€â”€ kb-requests/
-â”‚   â”‚   â”œâ”€â”€ procedure-requests/
-â”‚   â”‚   â”œâ”€â”€ solution-requests/
-â”‚   â”‚   â””â”€â”€ service-requests/
-â”‚   â”œâ”€â”€ roadmap/
-â”‚   â””â”€â”€ template-changes/
-â”‚       â””â”€â”€ YYYY-MM-DD-changes.md
-â”‚
-â”œâ”€â”€ 02-DRAFTS/                        â† MIRRORS fit-docs/docs/ exactly
-â”‚   â”œâ”€â”€ Blog/
-â”‚   â”œâ”€â”€ Finance/
-â”‚   â”œâ”€â”€ Knowledge-Base/
-â”‚   â”œâ”€â”€ Operations/
-â”‚   â”‚   â”œâ”€â”€ SOPs/                     â† DRAFT-sop-NN-title.md
-â”‚   â”‚   â””â”€â”€ Procedures/               â† DRAFT-procedure-title.md
-â”‚   â”œâ”€â”€ project/
-â”‚   â”œâ”€â”€ Services/
-â”‚   â”œâ”€â”€ Solutions/
-â”‚   â”‚   â”œâ”€â”€ fit-docs/
-â”‚   â”‚   â”œâ”€â”€ fit-web/
-â”‚   â”‚   â”œâ”€â”€ fit-rag/
-â”‚   â”‚   â””â”€â”€ _new-solution-template/
-â”‚   â””â”€â”€ Test-Examples/
-â”‚
-â”œâ”€â”€ 03-REVIEW/
-â”‚   â”œâ”€â”€ Operations/
-â”‚   â”‚   â”œâ”€â”€ SOPs/
-â”‚   â”‚   â””â”€â”€ Procedures/
-â”‚   â”œâ”€â”€ Knowledge-Base/
-â”‚   â”œâ”€â”€ Solutions/
-â”‚   â”œâ”€â”€ Services/
-â”‚   â””â”€â”€ Blog/
-â”‚
-â”œâ”€â”€ 04-OPERATIONS/
-â”‚   â”œâ”€â”€ _ops-dashboard.md
-â”‚   â”œâ”€â”€ _daily-briefing.md
-â”‚   â”œâ”€â”€ _doc-health.md
-â”‚   â”œâ”€â”€ _dependency-graph.md
-â”‚   â””â”€â”€ decisions/
-â”‚
-â”œâ”€â”€ 05-KNOWLEDGE/
-â”‚   â”œâ”€â”€ ai-tools/
-â”‚   â”œâ”€â”€ prompts/
-â”‚   â”œâ”€â”€ research/
-â”‚   â””â”€â”€ lessons-learned/
-â”‚
-â”œâ”€â”€ 06-CLIENTS/
-â”‚   â””â”€â”€ [client-name]/
-â”‚       â”œâ”€â”€ overview.md
-â”‚       â”œâ”€â”€ notes.md
-â”‚       â””â”€â”€ comms/
-â”‚
-â”œâ”€â”€ 07-ARCHIVE/
-â”‚   â”œâ”€â”€ promoted/
-â”‚   â””â”€â”€ abandoned/
-â”‚
-â””â”€â”€ _SYSTEM/
-    â”œâ”€â”€ agent-instructions.md         â† Rules every AI tool must follow (includes Part 0)
-    â”œâ”€â”€ vault-map.md
-    â”œâ”€â”€ naming-conventions.md
-    â”œâ”€â”€ tag-taxonomy.md
-    â”œâ”€â”€ changelog.md
-    â”œâ”€â”€ logs/
-    â”‚   â””â”€â”€ audit-log.md              â† Append-only promote/rollback log
-    â”œâ”€â”€ templates/
-    â”‚   â”œâ”€â”€ sop-draft.md
-    â”‚   â”œâ”€â”€ procedure-draft.md
-    â”‚   â”œâ”€â”€ kb-article-draft.md
-    â”‚   â”œâ”€â”€ solution-description.md
-    â”‚   â”œâ”€â”€ solution-readme.md
-    â”‚   â”œâ”€â”€ service-page.md
-    â”‚   â””â”€â”€ doc-request.md
-    â””â”€â”€ scripts/
-        â”œâ”€â”€ promote.py
-        â”œâ”€â”€ airtable_sync.py
-        â”œâ”€â”€ rollback.py
-        â”œâ”€â”€ health.py
-        â”œâ”€â”€ dep-graph.py
-        â””â”€â”€ template-diff.py
+|
+|-- 00-INBOX/
+|   |-- _quick-capture.md             <- Daily brain dump. Ideas, requests, voice notes.
+|   \-- _agent-drop/                  <- Agents write first drafts here for your review
+|
+|-- 01-PLANNING/
+|   |-- ideas/
+|   |-- requests/
+|   |   |-- sop-requests/
+|   |   |-- kb-requests/
+|   |   |-- procedure-requests/
+|   |   |-- solution-requests/
+|   |   \-- service-requests/
+|   |-- roadmap/
+|   \-- template-changes/
+|       \-- YYYY-MM-DD-changes.md
+|
+|-- 02-DRAFTS/                        <- MIRRORS fit-docs/docs/ exactly
+|   |-- Blog/
+|   |-- Finance/
+|   |-- Knowledge-Base/
+|   |-- Operations/
+|   |   |-- SOPs/                     <- DRAFT-sop-NN-title.md
+|   |   \-- Procedures/               <- DRAFT-procedure-title.md
+|   |-- project/
+|   |-- Services/
+|   |-- Solutions/
+|   |   |-- fit-docs/
+|   |   |-- fit-web/
+|   |   |-- fit-rag/
+|   |   \-- _new-solution-template/
+|   \-- Test-Examples/
+|
+|-- 03-REVIEW/
+|   |-- Operations/
+|   |   |-- SOPs/
+|   |   \-- Procedures/
+|   |-- Knowledge-Base/
+|   |-- Solutions/
+|   |-- Services/
+|   \-- Blog/
+|
+|-- 04-OPERATIONS/
+|   |-- _ops-dashboard.md
+|   |-- _daily-briefing.md
+|   |-- _doc-health.md
+|   |-- _dependency-graph.md
+|   \-- decisions/
+|
+|-- 05-KNOWLEDGE/
+|   |-- ai-tools/
+|   |-- prompts/
+|   |-- research/
+|   \-- lessons-learned/
+|
+|-- 06-CLIENTS/
+|   \-- [client-name]/
+|       |-- overview.md
+|       |-- notes.md
+|       \-- comms/
+|
+|-- 07-ARCHIVE/
+|   |-- promoted/
+|   \-- abandoned/
+|
+\-- _SYSTEM/
+    |-- agent-instructions.md         <- Rules every AI tool must follow (includes Part 0)
+    |-- vault-map.md
+    |-- naming-conventions.md
+    |-- tag-taxonomy.md
+    |-- changelog.md
+    |-- logs/
+    |   \-- audit-log.md              <- Append-only promote/rollback log
+    |-- templates/
+    |   |-- sop-draft.md
+    |   |-- procedure-draft.md
+    |   |-- kb-article-draft.md
+    |   |-- solution-description.md
+    |   |-- solution-readme.md
+    |   |-- service-page.md
+    |   \-- doc-request.md
+    \-- scripts/
+        |-- promote.py
+        |-- airtable_sync.py
+        |-- rollback.py
+        |-- health.py
+        |-- dep-graph.py
+        \-- template-diff.py
 ```
 
 ---
@@ -229,24 +234,27 @@ D:\Vaults\FIT-Vault\
 ## PART 3: NAMING CONVENTIONS
 
 ### Obsidian Draft Files
-```
+
+```text
 DRAFT-sop-21-aws-s3-backup.md
 DRAFT-procedure-deploy-mkdocs.md
 DRAFT-kb-what-is-fit-rag.md
 DRAFT-blog-2025-03-01-march-update.md
 ```
 
-### fit-docs Published Files (built by promote script â€” never manual)
-```
-ðŸ“š SOP 21 â€” AWS S3 Backup Configuration.md
-ðŸ“‹ PROC â€” Deploy â€” MkDocs to Production.md
-ðŸ“˜ KB â€” What Is FIT RAG.md
+### fit-docs Published Files (built by promote script - never manual)
+
+```text
+[SOP] SOP 21 - AWS S3 Backup Configuration.md
+[PROC] PROC - Deploy - MkDocs to Production.md
+[KB] KB - What Is FIT RAG.md
 ```
 
 ### Never Use
+
 - Spaces in filenames
 - `temp`, `misc`, `notes`, `untitled`
-- Dates buried in the middle: `sop-2025-aws.md` â† wrong
+- Dates buried in the middle: `sop-2025-aws.md` <- wrong
 
 ---
 
@@ -254,9 +262,10 @@ DRAFT-blog-2025-03-01-march-update.md
 
 > **Universal Base Only.** These fields apply to all doc types.
 > Library-specific fields are defined in each library's README.
-> If a README defines a field differently than this table â€” the README wins.
+> If a README defines a field differently than this table - the README wins.
 
 ### All Docs (Universal Base)
+
 ```yaml
 ---
 title: ""
@@ -273,7 +282,7 @@ updated: 2025-02-25
 source_basis: ""
 airtable_id: ""
 references: []
-# Publish gate â€” all relevant fields must be true before promote script runs
+# Publish gate - all relevant fields must be true before promote script runs
 gate_has_owner: false
 gate_metadata_complete: false
 gate_heading_structure_valid: false
@@ -283,7 +292,8 @@ gate_no_invented_slas: false    # PUBLIC_WEB / Dual only
 ---
 ```
 
-### Extended: SOP (defined by SOP README â€” these extend the base)
+### Extended: SOP (defined by SOP README - these extend the base)
+
 ```yaml
 sop_number: 21
 applies_to: ""
@@ -293,6 +303,7 @@ raci_accountable: ""
 ```
 
 ### Extended: Solution
+
 ```yaml
 solution_slug: fit-rag
 solution_status: active     # planned | active | beta | deprecated
@@ -309,6 +320,7 @@ deploy_url: ""
 > These templates exist so you can hit a hotkey and get a pre-filled draft in Obsidian.
 
 ### SOP Draft (`_SYSTEM/templates/sop-draft.md`)
+
 ```markdown
 ---
 title: ""
@@ -336,7 +348,7 @@ gate_no_invented_slas: false
 ---
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Title | |
 | Type | SOP Plan / Standard / Policy |
 | SOP_TARGET | INTERNAL / PUBLIC_WEB |
@@ -366,7 +378,7 @@ gate_no_invented_slas: false
 
 ## Roles and Responsibilities (RACI)
 | Role | R | A | C | I |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | | | | | |
 
 ## Exceptions
@@ -375,11 +387,12 @@ gate_no_invented_slas: false
 
 ## Changelog
 | Date | Version | Change | Author |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | {{date:YYYY-MM-DD}} | 0.1 | Initial draft | |
 ```
 
 ### KB Article Draft (`_SYSTEM/templates/kb-article-draft.md`)
+
 ```markdown
 ---
 title: ""
@@ -402,7 +415,7 @@ gate_no_invented_slas: false
 ---
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Title | |
 | Type | Overview / Service / FAQ / Policy / Glossary |
 | KB_TARGET | PUBLIC_WEB / INTERNAL |
@@ -429,6 +442,7 @@ gate_no_invented_slas: false
 ```
 
 ### Procedure Draft (`_SYSTEM/templates/procedure-draft.md`)
+
 ```markdown
 ---
 title: ""
@@ -452,7 +466,7 @@ gate_reviewed_by_human: false
 ---
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Title | |
 | Library | PROC |
 | Type | Procedure |
@@ -489,6 +503,7 @@ gate_reviewed_by_human: false
 ```
 
 ### Solution description.md (`_SYSTEM/templates/solution-description.md`)
+
 ```markdown
 ---
 title: ""
@@ -512,7 +527,7 @@ gate_reviewed_by_human: false
 ---
 
 | Field | Value |
-|---|---|
+| --- | --- |
 | Title | |
 | Type | FIT Solution |
 | Visibility | Public |
@@ -527,6 +542,7 @@ gate_reviewed_by_human: false
 ```
 
 ### Doc Request / Capture (`_SYSTEM/templates/doc-request.md`)
+
 ```markdown
 ---
 title: ""
@@ -617,7 +633,7 @@ AUDIT_LOG = VAULT_ROOT / "_SYSTEM" / "logs" / "audit-log.md"
 
 
 def parse_log_line(line: str) -> dict[str, str] | None:
-    m = re.match(r"^\[(.+?)\] \[(.+?)\] \[(.+?)\] \[(.+?)\] \[(.+?)\]$", line.strip())
+    m = re.match(r"^\[(.+[done])\] \[(.+[done])\] \[(.+[done])\] \[(.+[done])\] \[(.+[done])\]$", line.strip())
     if not m:
         return None
     return {
@@ -727,9 +743,9 @@ def rollback(published_filename: str, dry_run: bool = False) -> None:
     append_audit("ROLLBACK_SUCCESS", str(restored), str(target_path), commit_hash)
 
     if build_ok:
-        print("✅ Rollback complete.")
+        print("[done] Rollback complete.")
     else:
-        print("✅ Rollback complete (with mkdocs warning).")
+        print("[done] Rollback complete (with mkdocs warning).")
 
 
 if __name__ == "__main__":
@@ -1037,7 +1053,7 @@ VAULT_ROOT = Path(os.getenv("VAULT_ROOT", r"D:\Vaults\FIT-Vault"))
 TEMPLATES_ROOT = VAULT_ROOT / "_SYSTEM" / "templates"
 DRAFTS_ROOT = VAULT_ROOT / "02-DRAFTS"
 OUT_ROOT = VAULT_ROOT / "01-PLANNING" / "template-changes"
-H2_RE = re.compile(r"^##\s+(.+?)\s*$", re.MULTILINE)
+H2_RE = re.compile(r"^##\s+(.+[done])\s*$", re.MULTILINE)
 
 MATCH_RULES = {
     "sop-draft.md": "DRAFT-sop-*.md",
@@ -1211,9 +1227,9 @@ DRAFT_TO_DOCS = {
 }
 
 TYPE_TO_EMOJI = {
-    "sop": "📚",
-    "procedure": "📋",
-    "kb-article": "📘",
+    "sop": "[SOP]",
+    "procedure": "[PROC]",
+    "kb-article": "[KB]",
     "solution": None,
     "service": None,
     "blog": None,
@@ -1277,14 +1293,14 @@ def build_filename(fm: dict, original_name: str) -> str:
     title = fm.get("title", "untitled").strip()
     if doc_type == "sop":
         num = str(fm.get("sop_number", "XX")).zfill(2)
-        return f"{emoji} SOP {num} — {title}.md"
+        return f"{emoji} SOP {num} - {title}.md"
     if doc_type == "procedure":
         system = fm.get("system", "").strip()
         if system:
-            return f"{emoji} PROC — {system} — {title}.md"
-        return f"{emoji} PROC — {title}.md"
+            return f"{emoji} PROC - {system} - {title}.md"
+        return f"{emoji} PROC - {title}.md"
     if doc_type == "kb-article":
-        return f"{emoji} KB — {title}.md"
+        return f"{emoji} KB - {title}.md"
     return f"{emoji} {title}.md"
 
 
@@ -1376,51 +1392,55 @@ if __name__ == "__main__":
 ## PART 7: THE AUTHORING WORKFLOW
 
 ### Status Flow (Every Draft)
-```
-captured â†’ draft â†’ review â†’ promote-ready â†’ [script] â†’ promoted
-    â†‘ Plan       â†‘ Implement             â†‘ Validate    â†‘ Publish
+
+```text
+captured -> draft -> review -> promote-ready -> [script] -> promoted
+    ^ Plan       ^ Implement             ^ Validate    ^ Publish
 ```
 
 ### For a New SOP
-```
-1. CAPTURE   â†’ 00-INBOX/_quick-capture.md
 
-2. DRAFT     â†’ Agent reads SOP README â†’ drafts using sop-draft.md template
+```text
+1. CAPTURE   -> 00-INBOX/_quick-capture.md
+
+2. DRAFT     -> Agent reads SOP README -> drafts using sop-draft.md template
                Save to: 02-DRAFTS/Operations/SOPs/DRAFT-sop-21-title.md
 
-3. ELABORATE â†’ You edit in Obsidian
+3. ELABORATE -> You edit in Obsidian
 
-4. GATE      â†’ Flip frontmatter: status: promote-ready, gate_*: true
+4. GATE      -> Flip frontmatter: status: promote-ready, gate_*: true
 
-5. PROMOTE   â†’ python promote.py "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-..."
-               â†’ Lands in fit-docs/docs/Operations/SOPs/ðŸ“š SOP 21 â€” Title.md
-               â†’ mkdocs build --strict validates â†’ Git committed
+5. PROMOTE   -> python promote.py "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-..."
+               -> Lands in fit-docs/docs/Operations/SOPs/[SOP] SOP 21 - Title.md
+               -> mkdocs build --strict validates -> Git committed
 ```
 
 ### For a New Solution
-```
-1. CAPTURE   â†’ 01-PLANNING/requests/solution-requests/
-2. DRAFT x2  â†’ description.md + README.md in 02-DRAFTS/Solutions/fit-newproduct/
-3. GATE      â†’ Both files need gate fields true
-4. PROMOTE   â†’ Run script twice â€” one call per file
+
+```text
+1. CAPTURE   -> 01-PLANNING/requests/solution-requests/
+2. DRAFT x2  -> description.md + README.md in 02-DRAFTS/Solutions/fit-newproduct/
+3. GATE      -> Both files need gate fields true
+4. PROMOTE   -> Run script twice - one call per file
 ```
 
 ### Agent System Prompt (Universal)
-```
+
+```text
 You are a documentation agent for FIT Automate.
 
-CRITICAL â€” Before touching any file in a library folder:
-1. Read that folder's README.md (the ðŸ‘® file at the folder root)
+CRITICAL - Before touching any file in a library folder:
+1. Read that folder's README.md (the [RULE] file at the folder root)
 2. Extract naming convention, metadata table fields, required sections, content rules
-3. Apply only what the README defines â€” nothing invented, nothing from memory
-4. If README and master YAML conflict â€” README wins
+3. Apply only what the README defines - nothing invented, nothing from memory
+4. If README and master YAML conflict - README wins
 
 Context: [paste _SYSTEM/vault-map.md]
 Rules:
 - Do NOT invent SLAs, prices, or numbers unless explicitly provided
 - Set all gate_ fields to false, status to draft
 - For PUBLIC_WEB docs: no internal tool names, no internal process references
-- Output the complete markdown file only â€” no commentary, no preamble
+- Output the complete markdown file only - no commentary, no preamble
 
 Request: [paste capture note]
 ```
@@ -1429,45 +1449,48 @@ Request: [paste capture note]
 
 ## PART 8: DAILY BRIEFING PIPELINE
 
-```
+```text
 07:00 daily (Windows Task Scheduler)
-  â†“  airtable_sync.py
-     â†’ Pulls overdue + due-today from Airtable
-     â†’ Overwrites 04-OPERATIONS/_ops-dashboard.md
+  v  airtable_sync.py
+     -> Pulls overdue + due-today from Airtable
+     -> Overwrites 04-OPERATIONS/_ops-dashboard.md
 
-  â†“  fit-briefing-agent.py  (Phase 4 â€” build after promote script proven)
-     â†’ Reads _ops-dashboard.md
-     â†’ Reads 02-DRAFTS/ file count per folder
-     â†’ Reads _SYSTEM/changelog.md (last 7 days)
-     â†’ Writes fit-docs/docs/blog/posts/YYYY-MM-DD-daily-snapshot.md
+  v  fit-briefing-agent.py  (Phase 4 - build after promote script proven)
+     -> Reads _ops-dashboard.md
+     -> Reads 02-DRAFTS/ file count per folder
+     -> Reads _SYSTEM/changelog.md (last 7 days)
+     -> Writes fit-docs/docs/blog/posts/YYYY-MM-DD-daily-snapshot.md
 
-  â†“  mkdocs_hooks.py (already built)
-     â†’ Extracts Next Steps + Highlights
-     â†’ Injects Daily Snapshot into docs/home/index.md
+  v  mkdocs_hooks.py (already built)
+     -> Extracts Next Steps + Highlights
+     -> Injects Daily Snapshot into docs/home/index.md
 ```
 
 ---
 
 ## PART 9: PLUGIN STACK
 
-**Tier 1 â€” Day 1 (Core)**
+### Tier 1 - Day 1 (Core)
+
 | Plugin | Why |
-|---|---|
+| --- | --- |
 | Dataview | Query vault like a database |
 | Templater | Template engine with date logic |
 | Tasks | Task tracking with due dates |
 
-**Tier 2 â€” Week 1 (Workflow)**
+### Tier 2 - Week 1 (Workflow)
+
 | Plugin | Why |
-|---|---|
+| --- | --- |
 | QuickAdd | Rapid capture to correct location |
 | Shell Commands | Run promote script from inside Obsidian |
 | Commander | Toolbar buttons for promote, sync, capture |
 
-**Tier 3 â€” Month 2 (Automation)**
+### Tier 3 - Month 2 (Automation)
+
 | Plugin | Why |
-|---|---|
-| Local REST API | Vault at localhost:27123 â€” agent gateway |
+| --- | --- |
+| Local REST API | Vault at localhost:27123 - agent gateway |
 | Obsidian-Git | Auto-commit vault on schedule |
 | Kanban | Visual board for draft pipeline status |
 
@@ -1475,64 +1498,74 @@ Request: [paste capture note]
 
 ## PART 10: PHASED ROLLOUT
 
-### Phase 1 â€” fit-docs-forge Repo (Week 1) âœ…
+### Phase 1 - fit-docs-forge Repo (Week 1) [done]
+>
 > Build the agent system first. Everything else runs on top of it.
+
 - [x] Create `fit-docs-forge` repo from PIV bootstrap
 - [x] Run PIV loop: `.ai/` scaffolding + CI passes
 - [x] Seed `FIT-Automate-Master-Blueprint-v3.md` as the plan
-- [x] Agent reads blueprint â†’ proposes Phase 2 PRs
+- [x] Agent reads blueprint -> proposes Phase 2 PRs
 - [x] **Milestone:** PIV loop is live. Agent can read the plan and propose work.
 
-### Phase 2 â€” Vault Foundation (Days 3-5)
+### Phase 2 - Vault Foundation (Days 3-5)
+
 - [x] Create `D:\Vaults\FIT-Vault\` with full folder structure (Part 2)
 - [x] Create all 5 templates in `_SYSTEM/templates/` (Part 5 defines 5; 2 more TBD)
 - [x] Create `_SYSTEM/agent-instructions.md` (embed Part 0 README-as-schema rule)
 - [x] Create `_SYSTEM/vault-map.md`
-- [ ] Install Obsidian â†’ open FIT-Vault
+- [ ] Install Obsidian -> open FIT-Vault
 - [ ] Install Tier 1 plugins
 - [ ] **Milestone:** You can draft and organize content in Obsidian
 
-### Phase 3 â€” Promote Script (Days 5-7) âœ…
+### Phase 3 - Promote Script (Days 5-7) [done]
+
 - [x] `pip install pyyaml`
 - [x] Save `promote.py` to `_SYSTEM/scripts/` (scaffold copies automatically)
 - [x] Update `FIT_DOCS_ROOT` to your actual fit-docs path (via .env)
-- [x] Test on a throwaway draft â€” confirm file lands correctly
+- [x] Test on a throwaway draft - confirm file lands correctly
 - [x] Confirm `mkdocs build --strict` passes after promote
-- [x] Install Shell Commands plugin â†’ wire promote as a hotkey
+- [x] Install Shell Commands plugin -> wire promote as a hotkey
 - [x] **Milestone:** One command ships a doc from Obsidian to fit-docs
 
-### Phase 4 â€” Next.js Preview UI (Week 2)
+### Phase 4 - Next.js Preview UI (Week 2)
+>
 > The fit-docs-forge `/app` directory. Preview rendered MD without opening Typora.
+
 - [x] Scaffold Next.js app in `fit-docs-forge/app/`
-- [x] Wire to vault path â€” reads `02-DRAFTS/` and `03-REVIEW/` folders
+- [x] Wire to vault path - reads `02-DRAFTS/` and `03-REVIEW/` folders
 - [x] Render MD files with frontmatter panel (shows gate status)
 - [x] Approve button -> triggers promote script via Python API
 - [x] **Milestone:** Review and approve docs from browser. No Typora needed.
 
-### Phase 5 â€” Airtable Bridge (Week 2-3)
-- [ ] Get Airtable API key + Base/Table IDs
+### Phase 5 - Airtable Bridge (Week 2-3)
+
+- [x] Get Airtable API key + Base/Table IDs
 - [x] Build `airtable_sync.py`
 - [x] Windows Task Scheduler: every 60 minutes
 - [x] **Milestone:** Airtable tasks visible in Obsidian automatically
 
-### Phase 5.5 â€” System Safety & Observability
+### Phase 5.5 - System Safety & Observability
+
 | Phase | Feature | Est. Time | Dependencies |
-|---|---|---:|---|
+| --- | --- | ---: | --- |
 | Phase 5.5.1 | Audit Trail Log | 1 day | promote.py working (done) |
 | Phase 5.5.2 | Rollback Script | 1 day | Audit Trail |
 | Phase 5.5.3 | Doc Health Dashboard | 2 days | None |
 | Phase 5.5.4 | Doc Dependency Graph | 2 days | Dataview plugin installed |
 | Phase 5.5.5 | Template Auto-Update Alerter | 2 days | None |
 
-### Phase 6 â€” Agent Automation (Month 2)
+### Phase 6 - Agent Automation (Month 2)
+
 - [ ] Install Local REST API plugin
 - [ ] Build `fit-briefing-agent.py`
-- [ ] Agent scans `01-PLANNING/requests/` â†’ auto-drafts to `02-DRAFTS/`
+- [ ] Agent scans `01-PLANNING/requests/` -> auto-drafts to `02-DRAFTS/`
 - [ ] **Milestone:** Wake up to a daily briefing. Vault updates itself.
 
-### Phase 7 â€” Folder Rewrite Command (Month 2-3)
+### Phase 7 - Folder Rewrite Command (Month 2-3)
+
 - [ ] `fit-forge rewrite --folder <library>` command
-- [ ] Agent reads README â†’ diffs all files â†’ rewrites non-conforming
+- [ ] Agent reads README -> diffs all files -> rewrites non-conforming
 - [ ] Diffs surfaced in Next.js UI for review
 - [ ] **Milestone:** Update one README, re-run, entire folder conforms.
 
@@ -1541,8 +1574,9 @@ Request: [paste capture note]
 ## QUICK REFERENCE
 
 ### 5 Files You'll Touch Daily
+
 | File | Purpose |
-|---|---|
+| --- | --- |
 | `00-INBOX/_quick-capture.md` | Brain dump |
 | `04-OPERATIONS/_ops-dashboard.md` | Airtable task mirror |
 | `04-OPERATIONS/_daily-briefing.md` | Morning priorities |
@@ -1550,16 +1584,18 @@ Request: [paste capture note]
 | `_SYSTEM/changelog.md` | What the agents did |
 
 ### The Command That Ships a Doc
+
 ```powershell
 python D:\Vaults\FIT-Vault\_SYSTEM\scripts\promote.py "02-DRAFTS/<path-to-draft>"
 ```
 
 ### What Belongs Where
+
 | Content | Lives In | Never In |
-|---|---|---|
+| --- | --- | --- |
 | Published SOPs | fit-docs only | Obsidian |
 | Draft SOPs | Obsidian `02-DRAFTS/` until promoted | fit-docs |
-| Solution description.md | Obsidian draft â†’ promoted â†’ consumed by fit-web | Nowhere else |
+| Solution description.md | Obsidian draft -> promoted -> consumed by fit-web | Nowhere else |
 | Prompt library | Obsidian `05-KNOWLEDGE/prompts/` | fit-docs |
 | Agent rules | Obsidian `_SYSTEM/` + fit-docs-forge `.ai/` | Nowhere else |
 
@@ -1567,7 +1603,3 @@ python D:\Vaults\FIT-Vault\_SYSTEM\scripts\promote.py "02-DRAFTS/<path-to-draft>
 
 *FIT Automate Internal | v3.5 | February 2025*
 *Single source of truth. All previous drafts superseded.*
-
-
-
-
