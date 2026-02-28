@@ -1,48 +1,46 @@
-# Validation + Evidence Format
+﻿# Validation + Evidence Format
 
 ## Python gate (run from `/agent`)
-```
+```bash
 pip install -e ".[dev]"
 ruff check .
 pytest
 ```
 
 Expected evidence in PR:
-- ruff: "All checks passed." or diff count of 0
-- pytest: "X passed in Xs" — no failures, no errors
+- `ruff check`: no errors
+- `pytest`: all tests pass
 
 ## Next.js gate (run from `/app`)
-```
+```bash
 npm ci
 npm run lint
 npm run build
 ```
 
 Expected evidence in PR:
-- lint: exit 0, no errors
-- build: exit 0 or "Compiled successfully"
+- `npm run lint`: pass
+- `npm run build`: pass
 
-## Documentation gate (every PR)
-Before opening or merging any PR, confirm:
+## Documentation parity gate (every PR)
 
-### CHANGELOG.md
-- [ ] New entry added under `[Unreleased]` describing what changed
-- [ ] Entry uses the correct section: Added, Changed, Fixed, Removed, Deprecated
-- [ ] When a release is cut, `[Unreleased]` items move under a dated heading
+Before opening or merging any PR:
 
-### README.md
-- [ ] If the PR adds, removes, or renames a top-level file or directory — README structure table is updated
-- [ ] If the PR changes how validation works — README gate commands are updated
-- [ ] If the PR changes contributing workflow — README contributing section is updated
+### CHANGELOG
+- [ ] New `[Unreleased]` entry added (Added/Changed/Fixed/Removed)
 
-### .ai/ files
-- [ ] If agent rules change — `.ai/AGENT.md` is updated
-- [ ] If validation commands change — `.ai/COMMANDS.md` is updated
-- [ ] If repo structure changes — `.ai/skills/repo.md` is updated
+### README
+- [ ] Updated if phase status, workflow, structure, or run commands changed
 
-## Manual validation (John's gate)
-- John pulls the branch locally
-- Runs both CI gates himself
-- Confirms documentation gate: CHANGELOG entry exists, README is accurate
-- Tests the specific feature, confirms against acceptance criteria
-- Only John merges — never auto-merge
+### .ai docs
+- [ ] `.ai/COMMANDS.md` updated when script behavior/flags/env usage changed
+- [ ] `.ai/AGENT.md` updated when process rules or documentation gate changed
+- [ ] `.ai/skills/repo.md` updated when repo map/key concepts changed
+
+### Env alignment
+- [ ] `agent/.env.example` updated when env keys/default strategy changed
+- [ ] `.ai/COMMANDS.md` env block matches `.env.example`
+- [ ] Airtable field mapping policy (`AIRTABLE_USE_FIELD_IDS`) is consistent across docs
+
+### Safety workflow alignment
+- [ ] If promote/rollback/audit behavior changed, both `README.md` and `.ai/COMMANDS.md` were updated in the same PR
