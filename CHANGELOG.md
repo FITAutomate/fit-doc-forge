@@ -27,6 +27,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `agent/airtable_sync.py` now supports field-ID mode (`AIRTABLE_USE_FIELD_IDS` / `--use-field-ids`) so schema renames won't break mapping
 - Ops dashboard header now displays Airtable base/table/view names (with metadata lookup + env overrides), includes one top configurable board-view link, and removes the redundant Airtable link column
 - Ops dashboard task table now includes a `Priority` column sourced from configurable field mapping (`AIRTABLE_PRIORITY_FIELD`)
+- `agent/scripts/register-airtable-sync-task.ps1` and `agent/scripts/run-airtable-sync.ps1` to schedule hourly Airtable sync runs (08:00-22:00 by default)
+- `agent/scripts/unregister-airtable-sync-task.ps1` helper to remove the scheduled task cleanly
 - `agent/tests/test_airtable_sync.py` coverage for Airtable URL building, pagination, filtering, and dashboard file writes
 - `pytest.ini` at repo root so `pytest` resolves `agent/` modules when run from repo root
 - 4 sync tests covering copy, update, delete, and idempotency
@@ -66,6 +68,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `agent/airtable_sync.py` default Airtable field mapping updated to `Task Name` / `Due Date` / `Status` / `Assignee Name` and console UTF-8 output handling hardened for Windows
 - `.ai/COMMANDS.md` and `agent/.env.example` now document `AIRTABLE_USE_FIELD_IDS` for robust Airtable field mapping
 - `.ai/COMMANDS.md` and `agent/.env.example` now include base/table/view display name and top-link settings for dashboard output
+- Pytest temp/cache config now uses repo-local `.pytest_scratch/` to avoid Windows temp-folder permission issues that caused slow/hanging test runs
+- Checked Phase 5 scheduler and milestone boxes in the blueprint
 - `agent/.env.example` now includes Airtable base/table/view/field configuration variables
 - Checked the Phase 5 `Build airtable_sync.py` box in the blueprint
 

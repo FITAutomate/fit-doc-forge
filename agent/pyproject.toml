@@ -19,5 +19,5 @@ exclude = ["vault_templates*", "vault_system_docs*", "tests*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-addopts = "--basetemp=.pytest_tmp"
-cache_dir = ".pytest_tmp/.pytest_cache"
+addopts = "--basetemp=.pytest_scratch"
+cache_dir = ".pytest_scratch/.pytest_cache"

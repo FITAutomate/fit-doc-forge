@@ -49,6 +49,19 @@ python airtable_sync.py --dry-run
 python airtable_sync.py
 ```
 
+### Airtable Schedule (Windows)
+Run hourly from `08:00` to `22:00`:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forge\agent\scripts\register-airtable-sync-task.ps1"
+```
+
+Remove task:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forge\agent\scripts\unregister-airtable-sync-task.ps1"
+```
+
 ## Phase Status
 - Phase 3 (Promote Script): closed.
 - Phase 5 (Airtable Bridge): in progress (PR1 - `airtable_sync.py`).

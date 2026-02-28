@@ -86,6 +86,20 @@ Pulls Airtable tasks, filters overdue and due-today items, and writes `04-OPERAT
 | `--today YYYY-MM-DD` | Override current date for deterministic runs |
 | `--inspect-fields` | Print discovered field names + status counts and exit |
 
+### Schedule Airtable sync (Windows Task Scheduler)
+
+Register hourly task (08:00-22:00):
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "agent\scripts\register-airtable-sync-task.ps1"
+```
+
+Remove the task:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "agent\scripts\unregister-airtable-sync-task.ps1"
+```
+
 ### Scaffold the vault
 
 ```

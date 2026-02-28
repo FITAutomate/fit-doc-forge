@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 agent/.pytest_cache/
 .pytest_tmp/
+.pytest_scratch/
 app/node_modules/
 app/.next/
 app/dist/

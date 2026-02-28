@@ -815,8 +815,8 @@ Request: [paste capture note]
 ### Phase 5 — Airtable Bridge (Week 2-3)
 - [ ] Get Airtable API key + Base/Table IDs
 - [x] Build `airtable_sync.py`
-- [ ] Windows Task Scheduler: every 60 minutes
-- [ ] **Milestone:** Airtable tasks visible in Obsidian automatically
+- [x] Windows Task Scheduler: every 60 minutes
+- [x] **Milestone:** Airtable tasks visible in Obsidian automatically
 
 ### Phase 6 — Agent Automation (Month 2)
 - [ ] Install Local REST API plugin
