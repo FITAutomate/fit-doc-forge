@@ -1,0 +1,219 @@
+from datetime import date
+from pathlib import Path
+
+from airtable_sync import (
+    build_airtable_url,
+    fetch_airtable_records,
+    sync,
+)
+
+
+def test_build_airtable_url_encodes_table_and_view():
+    url = build_airtable_url("appBase123", "Ops Tasks", view="Daily Queue", page_size=50)
+    assert url.startswith("https://api.airtable.com/v0/appBase123/Ops%20Tasks?")
+    assert "view=Daily+Queue" in url
+    assert "pageSize=50" in url
+
+
+def test_build_airtable_url_supports_field_id_mode():
+    url = build_airtable_url(
+        "appBase123",
+        "tblTasks",
+        return_fields_by_field_id=True,
+    )
+    assert "returnFieldsByFieldId=true" in url
+
+
+def test_fetch_airtable_records_handles_pagination():
+    calls: list[str] = []
+    pages = [
+        {"records": [{"id": "recA", "fields": {}}], "offset": "next-page"},
+        {"records": [{"id": "recB", "fields": {}}]},
+    ]
+
+    def fake_fetcher(url: str, api_key: str):  # noqa: ARG001
+        calls.append(url)
+        return pages[len(calls) - 1]
+
+    records = fetch_airtable_records(
+        api_key="key123",
+        base_id="appBase",
+        table_id="Tasks",
+        fetcher=fake_fetcher,
+        page_size=1,
+    )
+
+    assert [record["id"] for record in records] == ["recA", "recB"]
+    assert len(calls) == 2
+    assert "offset=next-page" in calls[1]
+
+
+def test_sync_filters_overdue_and_due_today_and_renders_preview(tmp_path: Path):
+    today = date(2026, 2, 28)
+    payload = {
+        "records": [
+            {
+                "id": "recOverdue",
+                "fields": {
+                    "Due Date": "2026-02-27",
+                    "Task Name": "Fix alerts",
+                    "Assignee Name": "Ops",
+                    "Priority": "High",
+                    "Status": "In Progress",
+                },
+            },
+            {
+                "id": "recToday",
+                "fields": {
+                    "Due Date": "2026-02-28",
+                    "Task Name": "Publish update",
+                    "Assignee Name": "Docs",
+                    "Priority": "Medium",
+                    "Status": "Open",
+                },
+            },
+            {
+                "id": "recDone",
+                "fields": {
+                    "Due Date": "2026-02-28",
+                    "Task Name": "Closed item",
+                    "Assignee Name": "Ops",
+                    "Priority": "Low",
+                    "Status": "Done",
+                },
+            },
+            {
+                "id": "recFuture",
+                "fields": {
+                    "Due Date": "2026-03-01",
+                    "Task Name": "Future item",
+                    "Assignee Name": "Ops",
+                    "Priority": "Low",
+                    "Status": "Open",
+                },
+            },
+            {
+                "id": "recNoDue",
+                "fields": {"Task Name": "No date", "Assignee Name": "Ops", "Priority": "Low", "Status": "Open"},
+            },
+        ]
+    }
+
+    def fake_fetcher(url: str, api_key: str):  # noqa: ARG001
+        return payload
+
+    result = sync(
+        api_key="key123",
+        base_id="appBase",
+        table_id="Tasks",
+        view="viwMain",
+        base_name="My Base",
+        table_name="My Tasks",
+        view_name="My View",
+        dashboard_view_url="https://airtable.com/appBase/Tasks/viwMain?blocks=hide",
+        dashboard_view_label="Open working board",
+        vault_root=tmp_path / "vault",
+        dry_run=True,
+        today=today,
+        fetcher=fake_fetcher,
+    )
+
+    assert result["total_records"] == 5
+    assert result["overdue_count"] == 1
+    assert result["due_today_count"] == 1
+    assert result["written"] is False
+    assert "Fix alerts" in result["dashboard"]
+    assert "Publish update" in result["dashboard"]
+    assert "Closed item" not in result["dashboard"]
+    assert "Future item" not in result["dashboard"]
+    assert "https://airtable.com/appBase/Tasks/viwMain/recOverdue" in result["dashboard"]
+    assert "https://airtable.com/appBase/Tasks/viwMain/recToday" in result["dashboard"]
+    assert "| Due | Task | Owner | Priority | Status |" in result["dashboard"]
+    assert "Airtable |" not in result["dashboard"]
+    assert "Open working board" in result["dashboard"]
+    assert "- Airtable base: My Base" in result["dashboard"]
+    assert "- Airtable table: My Tasks" in result["dashboard"]
+    assert "- Airtable view: My View" in result["dashboard"]
+
+    dashboard_path = Path(result["target"])
+    assert not dashboard_path.exists()
+
+
+def test_sync_writes_ops_dashboard_file(tmp_path: Path):
+    payload = {
+        "records": [
+            {
+                "id": "recWrite",
+                "fields": {
+                    "Due Date": "2026-02-28",
+                    "Task Name": "Ship release",
+                    "Assignee Name": "Ops",
+                    "Priority": "High",
+                    "Status": "Open",
+                },
+            }
+        ]
+    }
+
+    def fake_fetcher(url: str, api_key: str):  # noqa: ARG001
+        return payload
+
+    vault = tmp_path / "vault"
+    result = sync(
+        api_key="key123",
+        base_id="appBase",
+        table_id="Tasks",
+        vault_root=vault,
+        dry_run=False,
+        today=date(2026, 2, 28),
+        fetcher=fake_fetcher,
+    )
+
+    target = Path(result["target"])
+    assert target.exists()
+    content = target.read_text(encoding="utf-8")
+    assert content.startswith("# Ops Dashboard")
+    assert "Ship release" in content
+    assert result["written"] is True
+
+
+def test_sync_with_field_ids_uses_return_fields_by_field_id(tmp_path: Path):
+    calls: list[str] = []
+    payload = {
+        "records": [
+            {
+                "id": "recWrite",
+                "fields": {
+                    "fldDue": "2026-02-28",
+                    "fldTitle": "Ship release",
+                    "fldStatus": "Open",
+                    "fldOwner": "Ops",
+                    "fldPriority": "High",
+                },
+            }
+        ]
+    }
+
+    def fake_fetcher(url: str, api_key: str):  # noqa: ARG001
+        calls.append(url)
+        return payload
+
+    result = sync(
+        api_key="key123",
+        base_id="appBase",
+        table_id="tblTasks",
+        view="viwMain",
+        due_field="fldDue",
+        title_field="fldTitle",
+        status_field="fldStatus",
+        owner_field="fldOwner",
+        priority_field="fldPriority",
+        use_field_ids=True,
+        vault_root=tmp_path / "vault",
+        dry_run=True,
+        today=date(2026, 2, 28),
+        fetcher=fake_fetcher,
+    )
+
+    assert "returnFieldsByFieldId=true" in calls[0]
+    assert result["due_today_count"] == 1
