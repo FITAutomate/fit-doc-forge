@@ -1,6 +1,6 @@
 ﻿# Commands Reference
 
-All commands run from repo root: `D:\dev\github\fit-docs-forge`
+All commands run from repo root: `D:\dev\github\fit-docs-forge`.
 
 ## Everyday Commands
 
@@ -12,40 +12,61 @@ python agent/promote.py "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-onboarding.md"
 
 Behavior summary:
 - validates gate fields and `status: promote-ready`
-- routes + writes target file in `fit-docs/docs/...`
-- runs `mkdocs build --strict` before commit
-- on successful commit, archives draft and appends audit entry
+- writes published target and runs `mkdocs build --strict`
+- commit behavior:
+  - changed publish content: commit + `PROMOTE_SUCCESS`
+  - no publish diff: skip commit gracefully + `PROMOTE_SUCCESS`
+  - failure: append `PROMOTE_FAILED` with stage details
 
 Flags:
 - `--dry-run`: preview only, no writes, no audit append
-- `--no-commit`: write/archive/update draft but skip git commit and skip audit append
+- `--no-commit`: write/archive/status update but skip git commit/audit success entry
 - `--vault PATH`: override vault root
 - `--fit-docs PATH`: override fit-docs docs root
 
-Obsidian shell command example:
+Obsidian Shell Command (recommended wrapper):
 
-```bash
-python D:\dev\github\fit-docs-forge\agent\promote.py --dry-run "{{file_path:relative}}"
+Dry run:
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forge\agent\scripts\run-promote.ps1" -DryRun -DraftPath "{{file_path:relative}}"
 ```
 
-### Rollback a promoted doc (Phase 5.5.2)
+Real promote:
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forge\agent\scripts\run-promote.ps1" -DraftPath "{{file_path:relative}}"
+```
+
+Persistent output log:
+`D:\Vaults\FIT-Vault\_SYSTEM\logs\shell-command.log`
+
+### Rollback a promoted doc
 
 ```bash
-python agent/rollback.py "📚 SOP 21 — Onboarding.md"
+python agent/rollback.py "🌐 Solution - fit-docs.md"
+python agent/rollback.py "🌐 Solution - fit-docs.md" --dry-run
 ```
 
 Behavior summary:
-- finds last matching `PROMOTE_SUCCESS` entry in `_SYSTEM/logs/audit-log.md`
-- deletes target doc from `fit-docs/docs/...`
-- runs `mkdocs build --strict`
-- runs `git rm` + `git commit`
-- restores archived draft to original draft path and resets `status: promote-ready`
-- appends `ROLLBACK_SUCCESS` audit entry
+- finds latest matching `PROMOTE_SUCCESS` from `_SYSTEM/logs/audit-log.md`
+- dry-run prints plan and appends `ROLLBACK_DRY_RUN`
+- real rollback deletes target -> strict build -> git rm/commit -> restores draft -> appends `ROLLBACK_SUCCESS`
 
 Flags:
-- `--dry-run`: print rollback plan and append `ROLLBACK_DRY_RUN`
-- `--vault PATH`: override vault root
-- `--fit-docs PATH`: override fit-docs docs root
+- `--dry-run`
+- `--vault PATH`
+- `--fit-docs PATH`
+
+Obsidian Shell Command examples:
+
+Dry run rollback:
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$log='D:\Vaults\FIT-Vault\_SYSTEM\logs\shell-command.log'; Add-Content $log \"`n--- $(Get-Date -Format o) ROLLBACK-DRY-RUN <published-filename>.md ---\"; $env:PATH='D:\dev\github\fit-docs\venv\Scripts;' + $env:PATH; & 'D:\dev\github\fit-docs\venv\Scripts\python.exe' 'D:\dev\github\fit-docs-forge\agent\rollback.py' '<published-filename>.md' --dry-run 2>&1 | Tee-Object -FilePath $log -Append"
+```
+
+Real rollback:
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$log='D:\Vaults\FIT-Vault\_SYSTEM\logs\shell-command.log'; Add-Content $log \"`n--- $(Get-Date -Format o) ROLLBACK <published-filename>.md ---\"; $env:PATH='D:\dev\github\fit-docs\venv\Scripts;' + $env:PATH; & 'D:\dev\github\fit-docs\venv\Scripts\python.exe' 'D:\dev\github\fit-docs-forge\agent\rollback.py' '<published-filename>.md' 2>&1 | Tee-Object -FilePath $log -Append"
+```
 
 ### Sync fit-docs into vault
 
@@ -53,51 +74,24 @@ Flags:
 python agent/fit-docs_sync.py
 ```
 
-### Sync Airtable tasks into ops dashboard
+### Sync Airtable tasks
 
 ```bash
 python agent/airtable_sync.py --dry-run
 python agent/airtable_sync.py
 ```
 
-Airtable field mapping policy:
-- default team mode is field IDs (`fld...`) in env values
-- set `AIRTABLE_USE_FIELD_IDS=true`
-- use `--inspect-fields` to discover available field names/status counts before mapping
-
-Useful flags:
-- `--inspect-fields`
-- `--use-field-ids`
-- `--title-field`, `--due-field`, `--status-field`, `--owner-field`, `--priority-field`
-- `--base-id`, `--table-id`, `--view`
-
-## Windows Scheduler
-
-Register hourly Airtable sync task:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "agent\scripts\register-airtable-sync-task.ps1"
-```
-
-Remove task:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "agent\scripts\unregister-airtable-sync-task.ps1"
-```
-
 ## Validation Gates
 
 Python gate:
-
 ```bash
 cd agent
-pip install -e ".[dev]"
+python -m pip install -e ".[dev]"
 ruff check .
-pytest
+pytest -q
 ```
 
 Next.js gate:
-
 ```bash
 cd app
 npm ci
@@ -106,8 +100,6 @@ npm run build
 ```
 
 ## Environment Setup (`agent/.env`)
-
-Start from `agent/.env.example`.
 
 ```dotenv
 VAULT_ROOT=D:\Vaults\FIT-Vault
@@ -134,19 +126,16 @@ AIRTABLE_USE_FIELD_IDS=true
 AIRTABLE_MAX_RECORDS=500
 ```
 
-If you intentionally map by field names instead of IDs, set `AIRTABLE_USE_FIELD_IDS=false`.
+## Audit Actions
 
-## Audit Log Reference
-
-File: `_SYSTEM/logs/audit-log.md`
-
-Format:
-
-```text
-[TIMESTAMP_UTC] [ACTION] [SOURCE_FILE] [TARGET_FILE] [GIT_COMMIT_HASH]
-```
-
-Actions in use:
+`_SYSTEM/logs/audit-log.md` actions:
 - `PROMOTE_SUCCESS`
+- `PROMOTE_FAILED`
 - `ROLLBACK_SUCCESS`
 - `ROLLBACK_DRY_RUN`
+
+## Status Flow Reference
+
+```text
+captured > draft > review > promote-ready > [promote.py] > promoted
+```

@@ -40,6 +40,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `app/app/drafts/approve-button.js` client-side approve action with status and error feedback in the draft browser
 - `app/scripts/start-server-bg.ps1` Windows helper to run Next.js dev server in the background
 - `app/scripts/stop-server-bg.ps1` Windows helper to stop the tracked background server process
+- `agent/scripts/run-promote.ps1` wrapper script for Obsidian to run promote with persistent command logging and preserved exit codes
 - `agent/rollback.py` Phase 5.5.2 rollback CLI using audit-log lookup with `--dry-run` support and audit events (`ROLLBACK_DRY_RUN`, `ROLLBACK_SUCCESS`)
 - `agent/tests/test_rollback.py` coverage for audit parsing, latest promote lookup, dry-run behavior, and full rollback flow
 - Scaffold now copies `rollback.py` into vault `_SYSTEM/scripts/`
@@ -80,6 +81,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Checked Phase 5 scheduler and milestone boxes in the blueprint
 - `agent/.env.example` now includes Airtable base/table/view/field configuration variables
 - Checked the Phase 5 `Build airtable_sync.py` box in the blueprint
+- `agent/promote.py` now treats no-diff re-promotes as successful idempotent runs (skips commit gracefully) and appends `PROMOTE_FAILED` audit entries on failed promote stages
+- `agent/tests/test_promote.py` expanded with no-diff commit skip coverage plus failure-audit coverage for validation, mkdocs, and git-diff failures
+- `.ai/COMMANDS.md` and `README.md` now document Obsidian wrapper usage (`run-promote.ps1`), promote no-diff behavior, and `PROMOTE_FAILED` audit visibility
+- `.ai/COMMANDS.md` now includes explicit Obsidian Shell Command templates for promote and rollback (dry-run and real) with persistent `shell-command.log` capture
 - `.ai/COMMANDS.md` rewritten for IDs-first Airtable mapping and now documents promote audit behavior plus rollback operations
 - `README.md` updated with current Phase 5.5 status and safety/observability notes
 - `.ai/AGENT.md`, `.ai/skills/tests.md`, `.ai/skills/repo.md`, `.ai/piv.config.yaml`, and PR template now include explicit documentation-parity guardrails

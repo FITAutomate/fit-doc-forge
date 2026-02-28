@@ -42,6 +42,18 @@ npm run build
 schtasks /Create /TN "fit-docs-forge-ui" /SC ONSTART /RL LIMITED /TR "powershell -NoProfile -ExecutionPolicy Bypass -File \"D:\dev\github\fit-docs-forge\app\scripts\start-server-bg.ps1\"" /F
 ```
 
+## Obsidian Promote Commands (Windows)
+- Dry run:
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forge\agent\scripts\run-promote.ps1" -DryRun -DraftPath "{{file_path:relative}}"
+```
+- Real promote:
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forge\agent\scripts\run-promote.ps1" -DraftPath "{{file_path:relative}}"
+```
+- Persistent shell-command log:
+  `D:\Vaults\FIT-Vault\_SYSTEM\logs\shell-command.log`
+
 ## Ops Sync (Airtable)
 ```bash
 cd agent
@@ -77,6 +89,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forg
 - Promote now validates strict build before commit and writes audit entries to `_SYSTEM/logs/audit-log.md` on successful commit.
 - Rollback flow is implemented in `agent/rollback.py` and can run in dry-run mode before changing files.
 - See `.ai/COMMANDS.md` for current promote/rollback operational commands.
+
+## Promote Troubleshooting
+- If a repeated promote has no publish diff, `promote.py` now completes successfully and skips git commit.
+- Promote failures append `PROMOTE_FAILED` entries to `_SYSTEM/logs/audit-log.md` with failure stage details.
 
 ## Contributing
 1. Read `.ai/AGENT.md` before every session.
