@@ -42,8 +42,16 @@ npm run build
 schtasks /Create /TN "fit-docs-forge-ui" /SC ONSTART /RL LIMITED /TR "powershell -NoProfile -ExecutionPolicy Bypass -File \"D:\dev\github\fit-docs-forge\app\scripts\start-server-bg.ps1\"" /F
 ```
 
+## Ops Sync (Airtable)
+```bash
+cd agent
+python airtable_sync.py --dry-run
+python airtable_sync.py
+```
+
 ## Phase Status
 - Phase 3 (Promote Script): closed.
+- Phase 5 (Airtable Bridge): in progress (PR1 - `airtable_sync.py`).
 
 ## Contributing
 1. Read `.ai/AGENT.md` before every session.

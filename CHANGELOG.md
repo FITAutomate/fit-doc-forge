@@ -21,6 +21,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `_REFERENCE/fit-docs/` vault folder read-only mirror of published docs for Obsidian indexing
 - `agent/fit_docs_sync.py` canonical one-way sync from `fit-docs/docs/` into vault `_REFERENCE/` plus CLI alias `fit-docs_sync.py`
 - `agent/airtable_sync.py` Phase 5 entrypoint placeholder with CLI flags
+- `agent/airtable_sync.py` Phase 5 implementation: Airtable pagination, due-date filtering, markdown dashboard rendering, and `--dry-run` preview support
+- `agent/airtable_sync.py --inspect-fields` mode to print discovered column names and status counts before syncing
+- `agent/tests/test_airtable_sync.py` coverage for Airtable URL building, pagination, filtering, and dashboard file writes
 - `pytest.ini` at repo root so `pytest` resolves `agent/` modules when run from repo root
 - 4 sync tests covering copy, update, delete, and idempotency
 - `app/` minimal real Next.js App Router scaffold (`app/app/layout.js`, `app/app/page.js`, `app/app/globals.css`, `.eslintrc.json`)
@@ -55,6 +58,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `app/package.json` Next.js default `dev` and `start` ports set to `3200`
 - Root and app READMEs now document background start/stop commands plus one-line Windows boot autostart task
 - Added explicit phase status note indicating Phase 3 is closed
+- `.ai/COMMANDS.md` now documents `airtable_sync.py` usage and Airtable env variables
+- `agent/airtable_sync.py` default Airtable field mapping updated to `Task Name` / `Due Date` / `Status` / `Assignee Name` and console UTF-8 output handling hardened for Windows
+- `agent/.env.example` now includes Airtable base/table/view/field configuration variables
+- Checked the Phase 5 `Build airtable_sync.py` box in the blueprint
 
 ## 2026-02-26
 

@@ -56,6 +56,29 @@ python agent/fit_docs_sync.py
 python agent/sync_fit_docs.py
 ```
 
+### Sync Airtable tasks into ops dashboard
+
+```
+python agent/airtable_sync.py
+```
+
+Pulls Airtable tasks, filters overdue and due-today items, and writes `04-OPERATIONS/_ops-dashboard.md` in the vault.
+
+| Flag | Effect |
+|---|---|
+| `--dry-run` | Print dashboard preview without writing files |
+| `--vault PATH` | Override vault root |
+| `--base-id ID` | Override Airtable base ID |
+| `--table-id ID_OR_NAME` | Override Airtable table |
+| `--view NAME` | Optional Airtable view |
+| `--due-field FIELD` | Due date field name (default `Due Date`) |
+| `--title-field FIELD` | Task title field name (default `Task Name`) |
+| `--status-field FIELD` | Task status field name (default `Status`) |
+| `--owner-field FIELD` | Task owner field name (default `Assignee Name`) |
+| `--max-records N` | Max records to process (default `500`) |
+| `--today YYYY-MM-DD` | Override current date for deterministic runs |
+| `--inspect-fields` | Print discovered field names + status counts and exit |
+
 ### Scaffold the vault
 
 ```
@@ -111,6 +134,14 @@ VAULT_ROOT=D:\Vaults\FIT-Vault
 FIT_DOCS_ROOT=D:\dev\github\fit-docs\docs
 ANTHROPIC_API_KEY=
 AIRTABLE_API_KEY=
+AIRTABLE_BASE_ID=
+AIRTABLE_TABLE_ID=
+AIRTABLE_VIEW=
+AIRTABLE_DUE_FIELD=Due Date
+AIRTABLE_TITLE_FIELD=Task Name
+AIRTABLE_STATUS_FIELD=Status
+AIRTABLE_OWNER_FIELD=Assignee Name
+AIRTABLE_MAX_RECORDS=500
 ```
 
 ### First-time setup
