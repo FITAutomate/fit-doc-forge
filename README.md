@@ -9,7 +9,7 @@ The full plan lives in [`FIT-Automate-Master-Blueprint-v3.md`](FIT-Automate-Mast
 |---|---|---|
 | `.ai/` | Agent rules, commands, config, templates, skills | Active |
 | `.github/` | CI workflows, Dependabot, PR/issue templates | Active |
-| `agent/` | Python package - AI logic, promote script, folder rewrites | Skeleton |
+| `agent/` | Python package - AI logic, promote/rollback scripts, folder rewrites | Active |
 | `app/` | Next.js - preview UI, gate status, approve-to-promote | Active (Phase 4 PR3) |
 | `FIT-Automate-Master-Blueprint-v3.md` | The master plan (7 phases) | Active |
 | `CHANGELOG.md` | Running history of every merged change | Active |
@@ -42,6 +42,18 @@ npm run build
 schtasks /Create /TN "fit-docs-forge-ui" /SC ONSTART /RL LIMITED /TR "powershell -NoProfile -ExecutionPolicy Bypass -File \"D:\dev\github\fit-docs-forge\app\scripts\start-server-bg.ps1\"" /F
 ```
 
+## Obsidian Promote Commands (Windows)
+- Dry run:
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forge\agent\scripts\run-promote.ps1" -DryRun -DraftPath "{{file_path:relative}}"
+```
+- Real promote:
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forge\agent\scripts\run-promote.ps1" -DraftPath "{{file_path:relative}}"
+```
+- Persistent shell-command log:
+  `D:\Vaults\FIT-Vault\_SYSTEM\logs\shell-command.log`
+
 ## Ops Sync (Airtable)
 ```bash
 cd agent
@@ -66,6 +78,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forg
 - Phase 3 (Promote Script): closed.
 - Phase 5 (Airtable Bridge): closed.
 - Phase 5.5 (System Safety & Observability): next PR sequence.
+
+## Promote Troubleshooting
+- If a repeated promote has no publish diff, `promote.py` now completes successfully and skips git commit.
+- Promote failures append `PROMOTE_FAILED` entries to `_SYSTEM/logs/audit-log.md` with failure stage details.
 
 ## Contributing
 1. Read `.ai/AGENT.md` before every session.

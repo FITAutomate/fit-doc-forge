@@ -22,7 +22,11 @@ If `python` or `py` fails with "The file cannot be accessed by the system":
 python agent/promote.py "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-onboarding.md"
 ```
 
-Validates gate fields, builds compliant filename (with emoji prefix), copies body into fit-docs, archives the original in `07-ARCHIVE/promoted/`, and commits to Git.
+Validates gate fields, builds compliant filename, copies body into fit-docs, runs `mkdocs build --strict`, then archives + updates draft status.  
+When committing:
+- changed publish content -> commits and audits `PROMOTE_SUCCESS`
+- unchanged publish content -> skips commit gracefully and still audits `PROMOTE_SUCCESS`
+- failures -> audits `PROMOTE_FAILED` with stage details
 
 | Flag | Effect |
 |---|---|
@@ -31,11 +35,20 @@ Validates gate fields, builds compliant filename (with emoji prefix), copies bod
 | `--vault PATH` | Override vault root (default: from `.env` or `D:\Vaults\FIT-Vault`) |
 | `--fit-docs PATH` | Override fit-docs root (default: from `.env` or `D:\dev\github\fit-docs\docs`) |
 
-**Obsidian Shell Command:**
+**Obsidian Shell Command (recommended wrapper):**
 
+Dry run:
 ```
-python D:\dev\github\fit-docs-forge\agent\promote.py --dry-run "{{file_path:relative}}"
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forge\agent\scripts\run-promote.ps1" -DryRun -DraftPath "{{file_path:relative}}"
 ```
+
+Real promote:
+```
+powershell -NoProfile -ExecutionPolicy Bypass -File "D:\dev\github\fit-docs-forge\agent\scripts\run-promote.ps1" -DraftPath "{{file_path:relative}}"
+```
+
+The wrapper writes persistent command output to:
+`D:\Vaults\FIT-Vault\_SYSTEM\logs\shell-command.log`
 
 ### Sync fit-docs into vault
 
@@ -163,12 +176,12 @@ AIRTABLE_TABLE_NAME=
 AIRTABLE_VIEW_NAME=
 AIRTABLE_DASHBOARD_VIEW_URL=
 AIRTABLE_DASHBOARD_VIEW_LABEL=Open board view
-AIRTABLE_DUE_FIELD=Due Date
-AIRTABLE_TITLE_FIELD=Task Name
-AIRTABLE_STATUS_FIELD=Status
-AIRTABLE_OWNER_FIELD=Assignee Name
-AIRTABLE_PRIORITY_FIELD=Priority
-AIRTABLE_USE_FIELD_IDS=false
+AIRTABLE_DUE_FIELD=fldXXXXXXXXXXXXDUE
+AIRTABLE_TITLE_FIELD=fldXXXXXXXXXXXXTTL
+AIRTABLE_STATUS_FIELD=fldXXXXXXXXXXXXSTS
+AIRTABLE_OWNER_FIELD=fldXXXXXXXXXXXXOWN
+AIRTABLE_PRIORITY_FIELD=fldXXXXXXXXXXXXPRI
+AIRTABLE_USE_FIELD_IDS=true
 AIRTABLE_MAX_RECORDS=500
 ```
 
@@ -197,3 +210,11 @@ captured > draft > review > promote-ready > [promote.py] > promoted
 | `gate_reviewed_by_human` | Human has reviewed and approved |
 | `gate_no_internal_refs` | No internal refs in public docs (PUBLIC_WEB only) |
 | `gate_no_invented_slas` | No made-up SLAs/prices (PUBLIC_WEB only) |
+
+## Audit Actions
+
+`_SYSTEM/logs/audit-log.md` now includes:
+- `PROMOTE_SUCCESS`
+- `PROMOTE_FAILED`
+- `ROLLBACK_SUCCESS`
+- `ROLLBACK_DRY_RUN`

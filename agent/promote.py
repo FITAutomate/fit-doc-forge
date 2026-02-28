@@ -68,6 +68,8 @@ PUBLIC_GATE_FIELDS = [
     "gate_no_invented_slas",
 ]
 
+FAILURE_ACTION = "PROMOTE_FAILED"
+
 
 def append_audit_entry(
     action: str,
@@ -83,6 +85,31 @@ def append_audit_entry(
     line = f"[{ts}] [{action}] [{source_file}] [{target_file}] [{commit_hash}]\n"
     with audit_log.open("a", encoding="utf-8") as fh:
         fh.write(line)
+
+
+def summarize_error(exc: Exception) -> str:
+    """Return a compact one-line error summary suitable for audit logs."""
+    text = str(exc).replace("\r", " ").replace("\n", " ")
+    text = re.sub(r"\s+", " ", text).strip()
+    if not text:
+        return "error"
+    return text[:160]
+
+
+def append_failure_audit_entry(
+    *,
+    audit_log: Path,
+    stage: str,
+    draft_rel_path: str | None,
+    target_path: Path | None,
+    error: Exception,
+) -> None:
+    """Append a promote failure audit entry."""
+    source_file = draft_rel_path or "-"
+    target_file = str(target_path) if target_path is not None else "-"
+    summary = summarize_error(error)
+    detail = f"failed:{stage}:{summary}"
+    append_audit_entry(FAILURE_ACTION, source_file, target_file, detail, audit_log=audit_log)
 
 
 def load_frontmatter(path: Path) -> tuple[dict, str]:
@@ -160,79 +187,124 @@ def promote(
     git_commit: bool = True,
 ) -> dict[str, str]:
     """Promote a draft. Returns dict with keys: target, archive, filename."""
-    draft_path = vault_root / draft_rel_path
-    if not draft_path.exists():
-        raise FileNotFoundError(f"Draft not found: {draft_path}")
-
-    fm, body = load_frontmatter(draft_path)
-
-    if fm.get("status") != "promote-ready":
-        raise ValueError(
-            f"Status is '{fm.get('status')}' -- must be 'promote-ready'"
-        )
-
-    failures = check_gate(fm)
-    if failures:
-        raise ValueError(
-            "Gate check failed:\n" + "\n".join(f"  - {f}: must be true" for f in failures)
-        )
-
-    target_folder = resolve_target_folder(draft_rel_path, fit_docs_root)
-    if not dry_run:
-        target_folder.mkdir(parents=True, exist_ok=True)
-
-    filename = build_filename(fm, draft_path.name)
-    target_path = target_folder / filename
-    body = update_last_updated(body)
     audit_log = vault_root / "_SYSTEM" / "logs" / "audit-log.md"
+    stage = "validate_status"
+    target_path: Path | None = None
 
-    if dry_run:
-        return {"target": str(target_path), "archive": "", "filename": filename}
-
-    target_path.write_text(body.lstrip(), encoding="utf-8")
-    git_root = fit_docs_root.parent
     try:
-        subprocess.run(["mkdocs", "build", "--strict"], cwd=git_root, check=True)
-    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
-        target_path.unlink(missing_ok=True)
-        raise RuntimeError("mkdocs build --strict failed; promotion aborted with no commit") from exc
+        draft_path = vault_root / draft_rel_path
+        if not draft_path.exists():
+            raise FileNotFoundError(f"Draft not found: {draft_path}")
 
-    archive = vault_root / "07-ARCHIVE" / "promoted" / draft_path.name
-    commit_hash = ""
+        fm, body = load_frontmatter(draft_path)
 
-    if git_commit:
-        subprocess.run(["git", "add", str(target_path)], cwd=git_root, check=True)
-        subprocess.run(
-            ["git", "commit", "-m", f"docs: promote {filename}"],
-            cwd=git_root,
-            check=True,
+        if fm.get("status") != "promote-ready":
+            raise ValueError(
+                f"Status is '{fm.get('status')}' -- must be 'promote-ready'"
+            )
+
+        stage = "validate_gates"
+        failures = check_gate(fm)
+        if failures:
+            raise ValueError(
+                "Gate check failed:\n" + "\n".join(f"  - {f}: must be true" for f in failures)
+            )
+
+        stage = "resolve_target"
+        target_folder = resolve_target_folder(draft_rel_path, fit_docs_root)
+        if not dry_run:
+            target_folder.mkdir(parents=True, exist_ok=True)
+
+        filename = build_filename(fm, draft_path.name)
+        target_path = target_folder / filename
+        body = update_last_updated(body)
+
+        if dry_run:
+            return {"target": str(target_path), "archive": "", "filename": filename, "commit_result": "dry_run"}
+
+        stage = "write_target"
+        target_path.write_text(body.lstrip(), encoding="utf-8")
+        git_root = fit_docs_root.parent
+        stage = "mkdocs_strict"
+        try:
+            subprocess.run(["mkdocs", "build", "--strict"], cwd=git_root, check=True)
+        except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+            target_path.unlink(missing_ok=True)
+            raise RuntimeError("mkdocs build --strict failed; promotion aborted with no commit") from exc
+
+        archive = vault_root / "07-ARCHIVE" / "promoted" / draft_path.name
+        commit_hash = ""
+        commit_result = "skipped"
+
+        if git_commit:
+            stage = "git_add"
+            subprocess.run(["git", "add", str(target_path)], cwd=git_root, check=True)
+            stage = "git_diff_cached"
+            target_rel = target_path.relative_to(git_root).as_posix()
+            diff_proc = subprocess.run(
+                ["git", "diff", "--cached", "--quiet", "--", target_rel],
+                cwd=git_root,
+                check=False,
+            )
+            if diff_proc.returncode == 1:
+                stage = "git_commit"
+                subprocess.run(
+                    ["git", "commit", "-m", f"docs: promote {filename}"],
+                    cwd=git_root,
+                    check=True,
+                )
+                commit_result = "committed"
+            elif diff_proc.returncode == 0:
+                commit_result = "no_changes"
+            else:
+                raise subprocess.CalledProcessError(diff_proc.returncode, diff_proc.args)
+
+            commit_hash = (
+                subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=git_root)
+                .decode("utf-8")
+                .strip()
+            )
+
+        stage = "post_publish_update"
+        archive.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(draft_path, archive)
+
+        draft_path.write_text(
+            "---\n"
+            + yaml.dump({**fm, "status": "promoted", "updated": str(date.today())}, allow_unicode=True)
+            + f"---\n{body}",
+            encoding="utf-8",
         )
-        commit_hash = (
-            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=git_root)
-            .decode("utf-8")
-            .strip()
-        )
 
-    archive.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(draft_path, archive)
+        if git_commit:
+            append_audit_entry(
+                "PROMOTE_SUCCESS",
+                draft_rel_path,
+                str(target_path),
+                commit_hash,
+                audit_log=audit_log,
+            )
 
-    draft_path.write_text(
-        "---\n"
-        + yaml.dump({**fm, "status": "promoted", "updated": str(date.today())}, allow_unicode=True)
-        + f"---\n{body}",
-        encoding="utf-8",
-    )
+        return {
+            "target": str(target_path),
+            "archive": str(archive),
+            "filename": filename,
+            "commit_result": commit_result,
+        }
 
-    if git_commit:
-        append_audit_entry(
-            "PROMOTE_SUCCESS",
-            draft_rel_path,
-            str(target_path),
-            commit_hash,
-            audit_log=audit_log,
-        )
-
-    return {"target": str(target_path), "archive": str(archive), "filename": filename}
+    except Exception as exc:
+        # Dry-run without errors should never write audit. Failed runs are always auditable.
+        try:
+            append_failure_audit_entry(
+                audit_log=audit_log,
+                stage=stage,
+                draft_rel_path=draft_rel_path,
+                target_path=target_path,
+                error=exc,
+            )
+        except Exception:
+            pass
+        raise
 
 
 def main() -> None:
@@ -263,7 +335,10 @@ def main() -> None:
         print(f"Promoted -> {result['target']}")
         print(f"Archived -> {result['archive']}")
         if not args.no_commit:
-            print(f"Git committed: docs: promote {result['filename']}")
+            if result.get("commit_result") == "no_changes":
+                print("Git commit skipped: no publish diff (already up to date).")
+            else:
+                print(f"Git committed: docs: promote {result['filename']}")
 
 
 if __name__ == "__main__":

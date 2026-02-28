@@ -23,6 +23,13 @@ def _write_draft(vault: Path, rel_path: str, fm: dict, body: str = "\n# Test\n")
     return p
 
 
+def _audit_lines(vault: Path) -> list[str]:
+    audit = vault / "_SYSTEM" / "logs" / "audit-log.md"
+    if not audit.exists():
+        return []
+    return audit.read_text(encoding="utf-8").splitlines()
+
+
 VALID_FM = {
     "title": "Test Doc",
     "type": "sop",
@@ -213,6 +220,7 @@ def test_promote_mkdocs_failure_removes_target(tmp_path: Path, monkeypatch: pyte
     assert not (vault / "07-ARCHIVE" / "promoted").exists()
     draft_after = (vault / draft_rel).read_text(encoding="utf-8")
     assert "status: promote-ready" in draft_after
+    assert any("[PROMOTE_FAILED]" in line and "[failed:mkdocs_strict:" in line for line in _audit_lines(vault))
 
 
 def test_promote_git_commit_appends_audit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
@@ -226,12 +234,14 @@ def test_promote_git_commit_appends_audit(tmp_path: Path, monkeypatch: pytest.Mo
 
     def fake_run(cmd, cwd=None, check=False):
         calls.append(cmd)
+        if cmd[:5] == ["git", "diff", "--cached", "--quiet", "--"]:
+            return subprocess.CompletedProcess(cmd, 1)
         return subprocess.CompletedProcess(cmd, 0)
 
     monkeypatch.setattr("promote.subprocess.run", fake_run)
     monkeypatch.setattr("promote.subprocess.check_output", lambda *args, **kwargs: b"abc123\n")
 
-    promote(
+    result = promote(
         draft_rel,
         vault_root=vault,
         fit_docs_root=fit_docs,
@@ -240,13 +250,73 @@ def test_promote_git_commit_appends_audit(tmp_path: Path, monkeypatch: pytest.Mo
 
     assert calls[0] == ["mkdocs", "build", "--strict"]
     assert calls[1][0:2] == ["git", "add"]
-    assert calls[2][0:2] == ["git", "commit"]
+    assert calls[2][0:2] == ["git", "diff"]
+    assert calls[3][0:2] == ["git", "commit"]
+    assert result["commit_result"] == "committed"
 
     audit_log = vault / "_SYSTEM" / "logs" / "audit-log.md"
     assert audit_log.exists()
     line = audit_log.read_text(encoding="utf-8").strip()
     assert "[PROMOTE_SUCCESS]" in line
     assert "[abc123]" in line
+
+
+def test_promote_no_diff_skips_git_commit_and_succeeds(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    vault = tmp_path / "vault"
+    fit_docs = tmp_path / "fit-docs" / "docs"
+    fit_docs.mkdir(parents=True)
+
+    draft_rel = "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-onboarding.md"
+    _write_draft(vault, draft_rel, VALID_FM, "\n# Onboarding\n")
+    calls: list[list[str]] = []
+
+    def fake_run(cmd, cwd=None, check=False):
+        calls.append(cmd)
+        if cmd[:5] == ["git", "diff", "--cached", "--quiet", "--"]:
+            return subprocess.CompletedProcess(cmd, 0)
+        return subprocess.CompletedProcess(cmd, 0)
+
+    monkeypatch.setattr("promote.subprocess.run", fake_run)
+    monkeypatch.setattr("promote.subprocess.check_output", lambda *args, **kwargs: b"headhash\n")
+
+    result = promote(
+        draft_rel,
+        vault_root=vault,
+        fit_docs_root=fit_docs,
+        git_commit=True,
+    )
+
+    assert result["commit_result"] == "no_changes"
+    assert any(cmd[:2] == ["git", "add"] for cmd in calls)
+    assert any(cmd[:2] == ["git", "diff"] for cmd in calls)
+    assert not any(cmd[:2] == ["git", "commit"] for cmd in calls)
+    assert any("[PROMOTE_SUCCESS]" in line and "[headhash]" in line for line in _audit_lines(vault))
+
+
+def test_promote_git_diff_error_records_failure_audit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    vault = tmp_path / "vault"
+    fit_docs = tmp_path / "fit-docs" / "docs"
+    fit_docs.mkdir(parents=True)
+
+    draft_rel = "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-onboarding.md"
+    _write_draft(vault, draft_rel, VALID_FM, "\n# Onboarding\n")
+
+    def fake_run(cmd, cwd=None, check=False):
+        if cmd[:5] == ["git", "diff", "--cached", "--quiet", "--"]:
+            return subprocess.CompletedProcess(cmd, 2)
+        return subprocess.CompletedProcess(cmd, 0)
+
+    monkeypatch.setattr("promote.subprocess.run", fake_run)
+
+    with pytest.raises(subprocess.CalledProcessError):
+        promote(
+            draft_rel,
+            vault_root=vault,
+            fit_docs_root=fit_docs,
+            git_commit=True,
+        )
+
+    assert any("[PROMOTE_FAILED]" in line and "[failed:git_diff_cached:" in line for line in _audit_lines(vault))
 
 
 def test_promote_rejects_non_ready(tmp_path: Path):
@@ -259,6 +329,7 @@ def test_promote_rejects_non_ready(tmp_path: Path):
 
     with pytest.raises(ValueError, match="must be 'promote-ready'"):
         promote("02-DRAFTS/Operations/SOPs/test.md", vault_root=vault, fit_docs_root=fit_docs, git_commit=False)
+    assert any("[PROMOTE_FAILED]" in line and "[failed:validate_status:" in line for line in _audit_lines(vault))
 
 
 def test_promote_rejects_failed_gate(tmp_path: Path):
@@ -271,6 +342,7 @@ def test_promote_rejects_failed_gate(tmp_path: Path):
 
     with pytest.raises(ValueError, match="gate_has_owner"):
         promote("02-DRAFTS/Operations/SOPs/test.md", vault_root=vault, fit_docs_root=fit_docs, git_commit=False)
+    assert any("[PROMOTE_FAILED]" in line and "[failed:validate_gates:" in line for line in _audit_lines(vault))
 
 
 def test_promote_dry_run(tmp_path: Path):

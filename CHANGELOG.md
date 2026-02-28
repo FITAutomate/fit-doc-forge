@@ -40,6 +40,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `app/app/drafts/approve-button.js` client-side approve action with status and error feedback in the draft browser
 - `app/scripts/start-server-bg.ps1` Windows helper to run Next.js dev server in the background
 - `app/scripts/stop-server-bg.ps1` Windows helper to stop the tracked background server process
+- `agent/scripts/run-promote.ps1` wrapper script for Obsidian to run promote with persistent command logging and preserved exit codes
 - `agent/promote.py` now runs `mkdocs build --strict` before commit and appends `_SYSTEM/logs/audit-log.md` only after successful git commit
 - Promote tests now cover mkdocs failure cleanup and successful audit-log append behavior
 
@@ -77,6 +78,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Checked Phase 5 scheduler and milestone boxes in the blueprint
 - `agent/.env.example` now includes Airtable base/table/view/field configuration variables
 - Checked the Phase 5 `Build airtable_sync.py` box in the blueprint
+- `agent/promote.py` now treats no-diff re-promotes as successful idempotent runs (skips commit gracefully) and appends `PROMOTE_FAILED` audit entries on failed promote stages
+- `agent/tests/test_promote.py` expanded with no-diff commit skip coverage plus failure-audit coverage for validation, mkdocs, and git-diff failures
+- `.ai/COMMANDS.md` and `README.md` now document Obsidian wrapper usage (`run-promote.ps1`), promote no-diff behavior, and `PROMOTE_FAILED` audit visibility
 - Issue template blueprint-phase dropdown now includes `Phase 5.5 - System Safety & Observability` and normalized phase labels to ASCII
 
 ## 2026-02-26
