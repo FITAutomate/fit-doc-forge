@@ -1,199 +1,152 @@
-# Commands Reference
+﻿# Commands Reference
 
-All commands run from the repo root: `D:\dev\github\fit-docs-forge`
-
----
-
-## Windows Prerequisite
-
-If `python` or `py` fails with "The file cannot be accessed by the system":
-
-1. Open **Settings > Apps > Advanced app settings > App execution aliases**
-2. Toggle **off** `python.exe` and `python3.exe` (the "App Installer" entries)
-3. Open a **new** terminal and verify with `python --version`
-
----
+All commands run from repo root: `D:\dev\github\fit-docs-forge`
 
 ## Everyday Commands
 
 ### Promote a draft
 
-```
+```bash
 python agent/promote.py "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-onboarding.md"
 ```
 
-Validates gate fields, builds compliant filename (with emoji prefix), copies body into fit-docs, archives the original in `07-ARCHIVE/promoted/`, and commits to Git.
+Behavior summary:
+- validates gate fields and `status: promote-ready`
+- routes + writes target file in `fit-docs/docs/...`
+- runs `mkdocs build --strict` before commit
+- on successful commit, archives draft and appends audit entry
 
-| Flag | Effect |
-|---|---|
-| `--dry-run` | Preview what would happen without writing anything |
-| `--no-commit` | Promote the file but skip the git add/commit step |
-| `--vault PATH` | Override vault root (default: from `.env` or `D:\Vaults\FIT-Vault`) |
-| `--fit-docs PATH` | Override fit-docs root (default: from `.env` or `D:\dev\github\fit-docs\docs`) |
+Flags:
+- `--dry-run`: preview only, no writes, no audit append
+- `--no-commit`: write/archive/update draft but skip git commit and skip audit append
+- `--vault PATH`: override vault root
+- `--fit-docs PATH`: override fit-docs docs root
 
-**Obsidian Shell Command:**
+Obsidian shell command example:
 
-```
+```bash
 python D:\dev\github\fit-docs-forge\agent\promote.py --dry-run "{{file_path:relative}}"
 ```
 
+### Rollback a promoted doc (Phase 5.5.2)
+
+```bash
+python agent/rollback.py "📚 SOP 21 — Onboarding.md"
+```
+
+Behavior summary:
+- finds last matching `PROMOTE_SUCCESS` entry in `_SYSTEM/logs/audit-log.md`
+- deletes target doc from `fit-docs/docs/...`
+- runs `mkdocs build --strict`
+- runs `git rm` + `git commit`
+- restores archived draft to original draft path and resets `status: promote-ready`
+- appends `ROLLBACK_SUCCESS` audit entry
+
+Flags:
+- `--dry-run`: print rollback plan and append `ROLLBACK_DRY_RUN`
+- `--vault PATH`: override vault root
+- `--fit-docs PATH`: override fit-docs docs root
+
 ### Sync fit-docs into vault
 
-```
+```bash
 python agent/fit-docs_sync.py
-```
-
-One-way mirror of `fit-docs/docs/` into `_REFERENCE/fit-docs/` inside the vault. Copies new/updated files, removes deleted files. Run this after any changes to fit-docs.
-
-| Flag | Effect |
-|---|---|
-| `--source PATH` | Override fit-docs/docs/ path |
-| `--vault PATH` | Override vault root |
-
-Legacy alias still works:
-```
-python agent/fit_docs_sync.py
-python agent/sync_fit_docs.py
 ```
 
 ### Sync Airtable tasks into ops dashboard
 
-```
+```bash
+python agent/airtable_sync.py --dry-run
 python agent/airtable_sync.py
 ```
 
-Pulls Airtable tasks, filters overdue and due-today items, and writes `04-OPERATIONS/_ops-dashboard.md` in the vault.
+Airtable field mapping policy:
+- default team mode is field IDs (`fld...`) in env values
+- set `AIRTABLE_USE_FIELD_IDS=true`
+- use `--inspect-fields` to discover available field names/status counts before mapping
 
-| Flag | Effect |
-|---|---|
-| `--dry-run` | Print dashboard preview without writing files |
-| `--vault PATH` | Override vault root |
-| `--base-id ID` | Override Airtable base ID |
-| `--table-id ID_OR_NAME` | Override Airtable table |
-| `--view NAME` | Optional Airtable view |
-| `--base-name NAME` | Force dashboard display name for base |
-| `--table-name NAME` | Force dashboard display name for table |
-| `--view-name NAME` | Force dashboard display name for view |
-| `--dashboard-view-url URL` | Add single top-of-dashboard link to this Airtable view |
-| `--dashboard-view-label TEXT` | Label for the top view link |
-| `--due-field FIELD` | Due date field name (default `Due Date`) |
-| `--title-field FIELD` | Task title field name (default `Task Name`) |
-| `--status-field FIELD` | Task status field name (default `Status`) |
-| `--owner-field FIELD` | Task owner field name (default `Assignee Name`) |
-| `--priority-field FIELD` | Task priority field name (default `Priority`) |
-| `--use-field-ids` | Treat `AIRTABLE_*_FIELD` values as Airtable field IDs (`fld...`) |
-| `--max-records N` | Max records to process (default `500`) |
-| `--today YYYY-MM-DD` | Override current date for deterministic runs |
-| `--inspect-fields` | Print discovered field names + status counts and exit |
+Useful flags:
+- `--inspect-fields`
+- `--use-field-ids`
+- `--title-field`, `--due-field`, `--status-field`, `--owner-field`, `--priority-field`
+- `--base-id`, `--table-id`, `--view`
 
-### Schedule Airtable sync (Windows Task Scheduler)
+## Windows Scheduler
 
-Register hourly task (08:00-22:00):
+Register hourly Airtable sync task:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File "agent\scripts\register-airtable-sync-task.ps1"
 ```
 
-Remove the task:
+Remove task:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File "agent\scripts\unregister-airtable-sync-task.ps1"
 ```
 
-### Scaffold the vault
+## Validation Gates
 
-```
-python agent/scaffold_vault.py
-```
+Python gate:
 
-Creates the full Obsidian vault folder tree, copies templates into `_SYSTEM/templates/`, system docs into `_SYSTEM/`, and scripts into `_SYSTEM/scripts/`. Idempotent -- safe to re-run anytime.
-
----
-
-## CI Validation Gates
-
-Run both before opening any PR.
-
-### Python gate
-
-```
+```bash
 cd agent
 pip install -e ".[dev]"
 ruff check .
 pytest
 ```
 
-### Next.js gate
+Next.js gate:
 
-```
+```bash
 cd app
 npm ci
 npm run lint
 npm run build
 ```
 
-### Both gates (PowerShell)
+## Environment Setup (`agent/.env`)
 
-```powershell
-# Terminal 1:
-cd agent; pip install -e ".[dev]"; ruff check .; pytest
+Start from `agent/.env.example`.
 
-# Terminal 2:
-cd app; npm ci; npm run lint; npm run build
-```
-
----
-
-## Environment Setup
-
-### `.env` file (in `agent/`)
-
-Copy `agent/.env.example` to `agent/.env` and fill in:
-
-```
+```dotenv
 VAULT_ROOT=D:\Vaults\FIT-Vault
 FIT_DOCS_ROOT=D:\dev\github\fit-docs\docs
 ANTHROPIC_API_KEY=
+
 AIRTABLE_API_KEY=
-AIRTABLE_BASE_ID=
-AIRTABLE_TABLE_ID=
-AIRTABLE_VIEW=
+AIRTABLE_BASE_ID=appXXXXXXXXXXXXXX
+AIRTABLE_TABLE_ID=tblXXXXXXXXXXXXXX
+AIRTABLE_VIEW=viwXXXXXXXXXXXXXX
 AIRTABLE_BASE_NAME=
 AIRTABLE_TABLE_NAME=
 AIRTABLE_VIEW_NAME=
 AIRTABLE_DASHBOARD_VIEW_URL=
 AIRTABLE_DASHBOARD_VIEW_LABEL=Open board view
-AIRTABLE_DUE_FIELD=Due Date
-AIRTABLE_TITLE_FIELD=Task Name
-AIRTABLE_STATUS_FIELD=Status
-AIRTABLE_OWNER_FIELD=Assignee Name
-AIRTABLE_PRIORITY_FIELD=Priority
-AIRTABLE_USE_FIELD_IDS=false
+
+# IDs-first mapping (preferred)
+AIRTABLE_DUE_FIELD=fldXXXXXXXXXXXXDUE
+AIRTABLE_TITLE_FIELD=fldXXXXXXXXXXXXTTL
+AIRTABLE_STATUS_FIELD=fldXXXXXXXXXXXXSTS
+AIRTABLE_OWNER_FIELD=fldXXXXXXXXXXXXOWN
+AIRTABLE_PRIORITY_FIELD=fldXXXXXXXXXXXXPRI
+AIRTABLE_USE_FIELD_IDS=true
 AIRTABLE_MAX_RECORDS=500
 ```
 
-### First-time setup
+If you intentionally map by field names instead of IDs, set `AIRTABLE_USE_FIELD_IDS=false`.
 
-```powershell
-cd agent; pip install -e ".[dev]"
-cd ..\app; npm ci
-python agent/scaffold_vault.py
-python agent/fit-docs_sync.py
+## Audit Log Reference
+
+File: `_SYSTEM/logs/audit-log.md`
+
+Format:
+
+```text
+[TIMESTAMP_UTC] [ACTION] [SOURCE_FILE] [TARGET_FILE] [GIT_COMMIT_HASH]
 ```
 
----
-
-## Status Flow Reference
-
-```
-captured > draft > review > promote-ready > [promote.py] > promoted
-```
-
-| Gate Field | Must be `true` before promote |
-|---|---|
-| `gate_has_owner` | Document has an assigned owner |
-| `gate_metadata_complete` | All required metadata fields filled |
-| `gate_heading_structure_valid` | H2/H3 structure matches library README |
-| `gate_reviewed_by_human` | Human has reviewed and approved |
-| `gate_no_internal_refs` | No internal refs in public docs (PUBLIC_WEB only) |
-| `gate_no_invented_slas` | No made-up SLAs/prices (PUBLIC_WEB only) |
+Actions in use:
+- `PROMOTE_SUCCESS`
+- `ROLLBACK_SUCCESS`
+- `ROLLBACK_DRY_RUN`

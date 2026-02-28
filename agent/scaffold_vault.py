@@ -1,4 +1,4 @@
-"""Create the FIT-Vault Obsidian folder tree defined in blueprint Part 2.
+﻿"""Create the FIT-Vault Obsidian folder tree defined in blueprint Part 2.
 
 Idempotent: directories are created with exist_ok=True and placeholder
 files are only written when they don't already exist.  Templates are
@@ -122,7 +122,7 @@ def scaffold(vault_root: Path) -> list[str]:
                 shutil.copy2(src, dest)
                 actions.append(f"system-doc {src.name}")
 
-    vault_scripts = ["promote.py", "fit_docs_sync.py", "fit-docs_sync.py", "airtable_sync.py"]
+    vault_scripts = ["promote.py", "rollback.py", "fit_docs_sync.py", "fit-docs_sync.py", "airtable_sync.py"]
     scripts_dest = vault_root / "_SYSTEM" / "scripts"
     scripts_dest.mkdir(parents=True, exist_ok=True)
     for script_name in vault_scripts:
@@ -150,7 +150,7 @@ def main() -> None:
             print(f"  + {a}")
         print(f"\nDone. {len(actions)} actions taken.")
     else:
-        print("Nothing to do — vault already scaffolded.")
+        print("Nothing to do - vault already scaffolded.")
 
 
 if __name__ == "__main__":

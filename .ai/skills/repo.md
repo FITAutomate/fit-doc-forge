@@ -1,28 +1,27 @@
-# fit-docs-forge — Repo Map
+﻿# fit-docs-forge - Repo Map
 
 ## Structure
-- `/agent` — Python package. All AI logic, file ops, promote scripts, and folder rewrites will live here.
-- `/app` - Next.js preview UI with a draft browser, gate panel, and approve-to-promote action (Phase 4 PR3).
-- `/.ai` — agent scaffolding. Read `AGENT.md` before every session.
-- `/FIT-Automate-Master-Blueprint-v3.md` — the master plan (7 phases). Agents consult this before proposing PRs.
-- `/CHANGELOG.md` — running history of every merged change. Updated on every PR.
-- `/.github` — CI workflows, Dependabot, PR template, issue template.
+- `/agent` - Python package for automation logic, promote/rollback scripts, and vault tooling.
+- `/app` - Next.js preview UI with draft browser, gate panel, and approve-to-promote action.
+- `/.ai` - Agent guidance, commands, templates, and repo-specific guardrails.
+- `/.github` - CI workflow, PR template, and issue templates.
+- `/FIT-Automate-Master-Blueprint-v3.md` - Master phase plan.
+- `/CHANGELOG.md` - Running merged-change history.
 
 ## Key concepts
-- Library README = schema for that folder. Always read it before touching files there.
-- Promote script: will validate gate fields, route drafts, and build compliant filenames when ready.
-- Gate fields: a set of `gate_` frontmatter booleans that must all be true before promotion.
-- Documentation gate: every PR must update CHANGELOG.md and keep README/`.ai/` files accurate.
-- Vault path: `C:\Vaults\FIT-Vault\` (local Windows environment used by the agent).
-- Fit-docs path: `C:\Dev\fit-docs\` (target repository where promoted drafts land).
+- README-as-schema: every fit-docs library README is the source of truth for structure and formatting.
+- Promote flow: validate gates -> write target -> strict build -> commit -> archive/update draft -> audit log.
+- Rollback flow: resolve from audit log -> remove target -> strict build -> commit -> restore archived draft -> audit log.
+- Documentation parity gate: keep CHANGELOG, README, `.ai/COMMANDS.md`, and `.env.example` synchronized.
 
-## Key directories in fit-docs (the target repo, not this one)
-- `docs/Operations/SOPs/` — published SOPs (named `📚 SOP NN — Title.md`)
-- `docs/Operations/Procedures/` — published procedures (named `📋 PROC — System — Title.md`)
-- `docs/Knowledge Base/` — published KB articles (named `📘 KB — Title.md`)
-- Each library folder has a README that is the schema source (the 👮 file)
+## Paths and environment
+- Vault root: `C:\Vaults\FIT-Vault\`
+- fit-docs root: `D:\dev\github\fit-docs\docs`
+- Runtime env file: `agent/.env` (never commit)
+- Template env file: `agent/.env.example`
 
-## Where env vars live
-- `agent/.env` — API keys, the vault path override, and the fit-docs path override. Never commit this file; it's in `.gitignore`.
-- `agent/.env.example` shows the expected keys.
-- `python-dotenv` is used to load these values at runtime.
+## fit-docs library targets
+- `docs/Operations/SOPs/`
+- `docs/Operations/Procedures/`
+- `docs/Knowledge Base/`
+- Each library contains a README schema file that must be read before edits.
