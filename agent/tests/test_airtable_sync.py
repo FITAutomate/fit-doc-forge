@@ -15,6 +15,15 @@ def test_build_airtable_url_encodes_table_and_view():
     assert "pageSize=50" in url
 
 
+def test_build_airtable_url_supports_field_id_mode():
+    url = build_airtable_url(
+        "appBase123",
+        "tblTasks",
+        return_fields_by_field_id=True,
+    )
+    assert "returnFieldsByFieldId=true" in url
+
+
 def test_fetch_airtable_records_handles_pagination():
     calls: list[str] = []
     pages = [
@@ -73,6 +82,7 @@ def test_sync_filters_overdue_and_due_today_and_renders_preview(tmp_path: Path):
         api_key="key123",
         base_id="appBase",
         table_id="Tasks",
+        view="viwMain",
         vault_root=tmp_path / "vault",
         dry_run=True,
         today=today,
@@ -87,6 +97,10 @@ def test_sync_filters_overdue_and_due_today_and_renders_preview(tmp_path: Path):
     assert "Publish update" in result["dashboard"]
     assert "Closed item" not in result["dashboard"]
     assert "Future item" not in result["dashboard"]
+    assert "https://airtable.com/appBase/Tasks/viwMain/recOverdue" in result["dashboard"]
+    assert "https://airtable.com/appBase/Tasks/viwMain/recToday" in result["dashboard"]
+    assert "| recOverdue |" not in result["dashboard"]
+    assert "| recToday |" not in result["dashboard"]
 
     dashboard_path = Path(result["target"])
     assert not dashboard_path.exists()
@@ -122,3 +136,43 @@ def test_sync_writes_ops_dashboard_file(tmp_path: Path):
     assert content.startswith("# Ops Dashboard")
     assert "Ship release" in content
     assert result["written"] is True
+
+
+def test_sync_with_field_ids_uses_return_fields_by_field_id(tmp_path: Path):
+    calls: list[str] = []
+    payload = {
+        "records": [
+            {
+                "id": "recWrite",
+                "fields": {
+                    "fldDue": "2026-02-28",
+                    "fldTitle": "Ship release",
+                    "fldStatus": "Open",
+                    "fldOwner": "Ops",
+                },
+            }
+        ]
+    }
+
+    def fake_fetcher(url: str, api_key: str):  # noqa: ARG001
+        calls.append(url)
+        return payload
+
+    result = sync(
+        api_key="key123",
+        base_id="appBase",
+        table_id="tblTasks",
+        view="viwMain",
+        due_field="fldDue",
+        title_field="fldTitle",
+        status_field="fldStatus",
+        owner_field="fldOwner",
+        use_field_ids=True,
+        vault_root=tmp_path / "vault",
+        dry_run=True,
+        today=date(2026, 2, 28),
+        fetcher=fake_fetcher,
+    )
+
+    assert "returnFieldsByFieldId=true" in calls[0]
+    assert result["due_today_count"] == 1

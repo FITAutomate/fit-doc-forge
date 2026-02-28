@@ -23,6 +23,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `agent/airtable_sync.py` Phase 5 entrypoint placeholder with CLI flags
 - `agent/airtable_sync.py` Phase 5 implementation: Airtable pagination, due-date filtering, markdown dashboard rendering, and `--dry-run` preview support
 - `agent/airtable_sync.py --inspect-fields` mode to print discovered column names and status counts before syncing
+- Airtable record links in ops dashboard now use full app/table/view/record URLs and display friendly labels (`Open`) instead of raw `rec...` IDs
+- `agent/airtable_sync.py` now supports field-ID mode (`AIRTABLE_USE_FIELD_IDS` / `--use-field-ids`) so schema renames won't break mapping
 - `agent/tests/test_airtable_sync.py` coverage for Airtable URL building, pagination, filtering, and dashboard file writes
 - `pytest.ini` at repo root so `pytest` resolves `agent/` modules when run from repo root
 - 4 sync tests covering copy, update, delete, and idempotency
@@ -60,6 +62,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Added explicit phase status note indicating Phase 3 is closed
 - `.ai/COMMANDS.md` now documents `airtable_sync.py` usage and Airtable env variables
 - `agent/airtable_sync.py` default Airtable field mapping updated to `Task Name` / `Due Date` / `Status` / `Assignee Name` and console UTF-8 output handling hardened for Windows
+- `.ai/COMMANDS.md` and `agent/.env.example` now document `AIRTABLE_USE_FIELD_IDS` for robust Airtable field mapping
 - `agent/.env.example` now includes Airtable base/table/view/field configuration variables
 - Checked the Phase 5 `Build airtable_sync.py` box in the blueprint
 

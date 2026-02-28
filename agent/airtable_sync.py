@@ -11,6 +11,7 @@ import argparse
 import io
 import json
 import os
+import re
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
@@ -26,6 +27,7 @@ load_dotenv()
 
 AIRTABLE_API_BASE = "https://api.airtable.com/v0"
 DEFAULT_COMPLETED_STATUSES = {"done", "complete", "completed", "closed", "canceled", "cancelled"}
+FIELD_ID_PATTERN = re.compile(r"^fld[A-Za-z0-9]+$")
 
 
 @dataclass(frozen=True)
@@ -83,6 +85,14 @@ def _escape_table_cell(value: str) -> str:
     return value.replace("|", "\\|")
 
 
+def _escape_link_text(value: str) -> str:
+    return value.replace("[", "\\[").replace("]", "\\]")
+
+
+def _looks_like_field_id(value: str) -> bool:
+    return bool(FIELD_ID_PATTERN.match(value.strip()))
+
+
 def build_airtable_url(
     base_id: str,
     table_id: str,
@@ -90,6 +100,7 @@ def build_airtable_url(
     view: str = "",
     offset: str = "",
     page_size: int = 100,
+    return_fields_by_field_id: bool = False,
 ) -> str:
     encoded_base = quote(base_id, safe="")
     encoded_table = quote(table_id, safe="")
@@ -98,7 +109,23 @@ def build_airtable_url(
         params["view"] = view
     if offset:
         params["offset"] = offset
+    if return_fields_by_field_id:
+        params["returnFieldsByFieldId"] = "true"
     return f"{AIRTABLE_API_BASE}/{encoded_base}/{encoded_table}?{urlencode(params)}"
+
+
+def build_airtable_record_url(
+    *,
+    base_id: str,
+    table_id: str,
+    view: str,
+    record_id: str,
+) -> str:
+    parts = [quote(base_id, safe=""), quote(table_id, safe="")]
+    if view:
+        parts.append(quote(view, safe=""))
+    parts.append(quote(record_id, safe=""))
+    return f"https://airtable.com/{'/'.join(parts)}"
 
 
 def fetch_json(url: str, api_key: str) -> dict[str, Any]:
@@ -128,6 +155,7 @@ def fetch_airtable_records(
     view: str = "",
     page_size: int = 100,
     max_records: int = 500,
+    return_fields_by_field_id: bool = False,
     fetcher: Callable[[str, str], dict[str, Any]] = fetch_json,
 ) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
@@ -140,6 +168,7 @@ def fetch_airtable_records(
             view=view,
             offset=offset,
             page_size=page_size,
+            return_fields_by_field_id=return_fields_by_field_id,
         )
         data = fetcher(url, api_key)
         page_records = data.get("records", [])
@@ -201,24 +230,38 @@ def split_tasks(tasks: list[AirtableTask], *, today: date) -> tuple[list[Airtabl
     return overdue, due_today
 
 
-def _render_section(tasks: list[AirtableTask], *, base_id: str) -> list[str]:
+def _render_section(
+    tasks: list[AirtableTask],
+    *,
+    base_id: str,
+    table_id: str,
+    view: str,
+) -> list[str]:
     if not tasks:
         return ["_None._"]
 
     lines = [
-        "| Due | Task | Owner | Status | Record |",
+        "| Due | Task | Owner | Status | Airtable |",
         "|---|---|---|---|---|",
     ]
     for task in tasks:
-        record_label = task.record_id
-        if base_id and task.record_id != "unknown":
-            record_label = f"[{task.record_id}](https://airtable.com/{base_id}/{task.record_id})"
+        task_label = _escape_table_cell(task.title)
+        record_label = "-"
+        if base_id and table_id and task.record_id != "unknown":
+            record_url = build_airtable_record_url(
+                base_id=base_id,
+                table_id=table_id,
+                view=view,
+                record_id=task.record_id,
+            )
+            task_label = f"[{_escape_link_text(task_label)}]({record_url})"
+            record_label = f"[Open]({record_url})"
         lines.append(
             "| "
             + " | ".join(
                 [
                     str(task.due),
-                    _escape_table_cell(task.title),
+                    task_label,
                     _escape_table_cell(task.owner or "-"),
                     _escape_table_cell(task.status),
                     record_label,
@@ -236,6 +279,7 @@ def render_dashboard(
     generated_at: datetime,
     base_id: str,
     table_id: str,
+    view: str,
 ) -> str:
     timestamp = generated_at.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     lines: list[str] = [
@@ -246,12 +290,13 @@ def render_dashboard(
         f"- Last sync: {timestamp}",
         f"- Airtable base: {base_id}",
         f"- Airtable table: {table_id}",
+        f"- Airtable view: {view or '(none)'}",
         "",
         "## Overdue",
     ]
-    lines.extend(_render_section(overdue, base_id=base_id))
+    lines.extend(_render_section(overdue, base_id=base_id, table_id=table_id, view=view))
     lines.extend(["", "## Due Today"])
-    lines.extend(_render_section(due_today, base_id=base_id))
+    lines.extend(_render_section(due_today, base_id=base_id, table_id=table_id, view=view))
     lines.extend(
         [
             "",
@@ -277,6 +322,7 @@ def sync(
     status_field: str = "Status",
     owner_field: str = "Owner",
     max_records: int = 500,
+    use_field_ids: bool = False,
     dry_run: bool = False,
     today: date | None = None,
     fetcher: Callable[[str, str], dict[str, Any]] = fetch_json,
@@ -287,6 +333,7 @@ def sync(
         table_id=table_id,
         view=view,
         max_records=max_records,
+        return_fields_by_field_id=use_field_ids,
         fetcher=fetcher,
     )
 
@@ -313,6 +360,7 @@ def sync(
         generated_at=datetime.now(timezone.utc),
         base_id=base_id,
         table_id=table_id,
+        view=view,
     )
 
     target = vault_root / "04-OPERATIONS" / "_ops-dashboard.md"
@@ -370,6 +418,13 @@ def _env_int(name: str, fallback: int) -> int:
         return fallback
 
 
+def _env_bool(name: str, fallback: bool = False) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return fallback
+    return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
 def _ensure_utf8_stdio() -> None:
     stdout = getattr(sys.stdout, "buffer", None)
     stderr = getattr(sys.stderr, "buffer", None)
@@ -390,6 +445,12 @@ def main() -> None:
     parser.add_argument("--title-field", default=os.getenv("AIRTABLE_TITLE_FIELD", "Task Name"), help="Task title field")
     parser.add_argument("--status-field", default=os.getenv("AIRTABLE_STATUS_FIELD", "Status"), help="Task status field")
     parser.add_argument("--owner-field", default=os.getenv("AIRTABLE_OWNER_FIELD", "Assignee Name"), help="Task owner field")
+    parser.add_argument(
+        "--use-field-ids",
+        action="store_true",
+        default=_env_bool("AIRTABLE_USE_FIELD_IDS", False),
+        help="Treat AIRTABLE_*_FIELD values as Airtable field IDs (fld...)",
+    )
     parser.add_argument(
         "--max-records",
         type=int,
@@ -428,6 +489,11 @@ def main() -> None:
             print(f"ERROR: missing required setting: {item}", file=sys.stderr)
         raise SystemExit(1)
 
+    resolved_use_field_ids = args.use_field_ids or any(
+        _looks_like_field_id(value)
+        for value in [args.due_field, args.title_field, args.status_field, args.owner_field]
+    )
+
     try:
         if args.inspect_fields:
             records = fetch_airtable_records(
@@ -436,6 +502,7 @@ def main() -> None:
                 table_id=args.table_id,
                 view=args.view,
                 max_records=args.max_records,
+                return_fields_by_field_id=resolved_use_field_ids,
             )
             summary = inspect_records(records=records, due_field=args.due_field, status_field=args.status_field)
             print(f"Records scanned: {summary['total_records']}")
@@ -458,6 +525,7 @@ def main() -> None:
             status_field=args.status_field,
             owner_field=args.owner_field,
             max_records=args.max_records,
+            use_field_ids=resolved_use_field_ids,
             vault_root=args.vault,
             today=args.today,
             dry_run=args.dry_run,
