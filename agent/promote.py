@@ -20,7 +20,7 @@ import re
 import shutil
 import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 import yaml
@@ -67,6 +67,22 @@ PUBLIC_GATE_FIELDS = [
     "gate_no_internal_refs",
     "gate_no_invented_slas",
 ]
+
+
+def append_audit_entry(
+    action: str,
+    source_file: str,
+    target_file: str,
+    commit_hash: str,
+    *,
+    audit_log: Path,
+) -> None:
+    """Append one UTC audit entry to the vault audit log."""
+    audit_log.parent.mkdir(parents=True, exist_ok=True)
+    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    line = f"[{ts}] [{action}] [{source_file}] [{target_file}] [{commit_hash}]\n"
+    with audit_log.open("a", encoding="utf-8") as fh:
+        fh.write(line)
 
 
 def load_frontmatter(path: Path) -> tuple[dict, str]:
@@ -168,13 +184,35 @@ def promote(
     filename = build_filename(fm, draft_path.name)
     target_path = target_folder / filename
     body = update_last_updated(body)
+    audit_log = vault_root / "_SYSTEM" / "logs" / "audit-log.md"
 
     if dry_run:
         return {"target": str(target_path), "archive": "", "filename": filename}
 
     target_path.write_text(body.lstrip(), encoding="utf-8")
+    git_root = fit_docs_root.parent
+    try:
+        subprocess.run(["mkdocs", "build", "--strict"], cwd=git_root, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
+        target_path.unlink(missing_ok=True)
+        raise RuntimeError("mkdocs build --strict failed; promotion aborted with no commit") from exc
 
     archive = vault_root / "07-ARCHIVE" / "promoted" / draft_path.name
+    commit_hash = ""
+
+    if git_commit:
+        subprocess.run(["git", "add", str(target_path)], cwd=git_root, check=True)
+        subprocess.run(
+            ["git", "commit", "-m", f"docs: promote {filename}"],
+            cwd=git_root,
+            check=True,
+        )
+        commit_hash = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=git_root)
+            .decode("utf-8")
+            .strip()
+        )
+
     archive.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(draft_path, archive)
 
@@ -186,12 +224,12 @@ def promote(
     )
 
     if git_commit:
-        git_root = fit_docs_root.parent
-        subprocess.run(["git", "add", str(target_path)], cwd=git_root, check=True)
-        subprocess.run(
-            ["git", "commit", "-m", f"docs: promote {filename}"],
-            cwd=git_root,
-            check=True,
+        append_audit_entry(
+            "PROMOTE_SUCCESS",
+            draft_rel_path,
+            str(target_path),
+            commit_hash,
+            audit_log=audit_log,
         )
 
     return {"target": str(target_path), "archive": str(archive), "filename": filename}
@@ -214,7 +252,7 @@ def main() -> None:
             dry_run=args.dry_run,
             git_commit=not args.no_commit and not args.dry_run,
         )
-    except (FileNotFoundError, ValueError) as exc:
+    except (FileNotFoundError, ValueError, RuntimeError, subprocess.CalledProcessError) as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
 

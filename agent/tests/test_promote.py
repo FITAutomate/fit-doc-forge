@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 
 import pytest
 import yaml
@@ -149,7 +150,7 @@ def test_update_last_updated():
 
 # --- promote (integration) ---
 
-def test_promote_full_flow(tmp_path: Path):
+def test_promote_full_flow(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     vault = tmp_path / "vault"
     fit_docs = tmp_path / "fit-docs" / "docs"
     fit_docs.mkdir(parents=True)
@@ -157,6 +158,12 @@ def test_promote_full_flow(tmp_path: Path):
     draft_rel = "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-onboarding.md"
     body = "\n| Last Updated | 2025-01-01 |\n\n# Onboarding\n\n## Purpose\n"
     _write_draft(vault, draft_rel, VALID_FM, body)
+
+    def fake_run(cmd, cwd=None, check=False):
+        assert cmd == ["mkdocs", "build", "--strict"]
+        return subprocess.CompletedProcess(cmd, 0)
+
+    monkeypatch.setattr("promote.subprocess.run", fake_run)
 
     result = promote(
         draft_rel,
@@ -176,6 +183,70 @@ def test_promote_full_flow(tmp_path: Path):
 
     draft_after = (vault / draft_rel).read_text(encoding="utf-8")
     assert "status: promoted" in draft_after
+    assert not (vault / "_SYSTEM" / "logs" / "audit-log.md").exists()
+
+
+def test_promote_mkdocs_failure_removes_target(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    vault = tmp_path / "vault"
+    fit_docs = tmp_path / "fit-docs" / "docs"
+    fit_docs.mkdir(parents=True)
+
+    draft_rel = "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-onboarding.md"
+    _write_draft(vault, draft_rel, VALID_FM, "\n# Onboarding\n")
+
+    def fail_mkdocs(cmd, cwd=None, check=False):
+        if cmd[:2] == ["mkdocs", "build"]:
+            raise subprocess.CalledProcessError(returncode=1, cmd=cmd)
+        return subprocess.CompletedProcess(cmd, 0)
+
+    monkeypatch.setattr("promote.subprocess.run", fail_mkdocs)
+
+    with pytest.raises(RuntimeError, match="mkdocs build --strict failed"):
+        promote(
+            draft_rel,
+            vault_root=vault,
+            fit_docs_root=fit_docs,
+            git_commit=False,
+        )
+
+    assert not list((fit_docs / "Operations" / "SOPs").glob("*.md"))
+    assert not (vault / "07-ARCHIVE" / "promoted").exists()
+    draft_after = (vault / draft_rel).read_text(encoding="utf-8")
+    assert "status: promote-ready" in draft_after
+
+
+def test_promote_git_commit_appends_audit(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    vault = tmp_path / "vault"
+    fit_docs = tmp_path / "fit-docs" / "docs"
+    fit_docs.mkdir(parents=True)
+
+    draft_rel = "02-DRAFTS/Operations/SOPs/DRAFT-sop-21-onboarding.md"
+    _write_draft(vault, draft_rel, VALID_FM, "\n# Onboarding\n")
+    calls: list[list[str]] = []
+
+    def fake_run(cmd, cwd=None, check=False):
+        calls.append(cmd)
+        return subprocess.CompletedProcess(cmd, 0)
+
+    monkeypatch.setattr("promote.subprocess.run", fake_run)
+    monkeypatch.setattr("promote.subprocess.check_output", lambda *args, **kwargs: b"abc123\n")
+
+    promote(
+        draft_rel,
+        vault_root=vault,
+        fit_docs_root=fit_docs,
+        git_commit=True,
+    )
+
+    assert calls[0] == ["mkdocs", "build", "--strict"]
+    assert calls[1][0:2] == ["git", "add"]
+    assert calls[2][0:2] == ["git", "commit"]
+
+    audit_log = vault / "_SYSTEM" / "logs" / "audit-log.md"
+    assert audit_log.exists()
+    line = audit_log.read_text(encoding="utf-8").strip()
+    assert "[PROMOTE_SUCCESS]" in line
+    assert "[abc123]" in line
 
 
 def test_promote_rejects_non_ready(tmp_path: Path):

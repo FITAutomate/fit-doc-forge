@@ -6,6 +6,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
+
 - `.ai/COMMANDS.md` rewritten as full command manual with flags, Obsidian shell command syntax, gate reference, and first-time setup
 - `agent/promote.py` promote script from blueprint Part 6: validates gates, builds compliant filenames, routes to fit-docs, archives originals
 - 19 promote tests covering gate validation, filename building, folder routing, dry-run, and full integration flow
@@ -39,8 +40,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `app/app/drafts/approve-button.js` client-side approve action with status and error feedback in the draft browser
 - `app/scripts/start-server-bg.ps1` Windows helper to run Next.js dev server in the background
 - `app/scripts/stop-server-bg.ps1` Windows helper to stop the tracked background server process
+- `agent/promote.py` now runs `mkdocs build --strict` before commit and appends `_SYSTEM/logs/audit-log.md` only after successful git commit
+- Promote tests now cover mkdocs failure cleanup and successful audit-log append behavior
 
 ### Changed
+
 - Blueprint Part 0 library README table updated to match actual file paths (`README.md`, not emoji names)
 - `agent-instructions.md` now points agents to `_REFERENCE/fit-docs/` for library rules
 - `vault-map.md` includes `_REFERENCE/` section
@@ -73,10 +77,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Checked Phase 5 scheduler and milestone boxes in the blueprint
 - `agent/.env.example` now includes Airtable base/table/view/field configuration variables
 - Checked the Phase 5 `Build airtable_sync.py` box in the blueprint
+- Issue template blueprint-phase dropdown now includes `Phase 5.5 - System Safety & Observability` and normalized phase labels to ASCII
 
 ## 2026-02-26
 
 ### Added
+
 - Full v3 master blueprint (864 lines) replacing the placeholder v1 (`d90225a`)
 - `.ai/` scaffolding: AGENT.md, COMMANDS.md, piv.config.yaml, templates, skills (`0a9e571`)
 - `.github/` plumbing: forge-ci.yml (Python + Next.js gates), dependabot.yml, PR template, issue template (`0a9e571`)
@@ -85,7 +91,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - CHANGELOG.md and documentation gate rules (this PR)
 
 ### Fixed
+
 - `setup-node` cache path pointed at repo root instead of `app/package-lock.json` (`5075f44`)
 
 ### Removed
+
 - Placeholder v1 blueprint (replaced by real v3) (`d90225a`)
